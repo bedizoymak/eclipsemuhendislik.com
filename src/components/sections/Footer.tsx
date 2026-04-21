@@ -1,4 +1,4 @@
-import { Linkedin, Twitter, Github } from "lucide-react";
+import { Linkedin, Mail, Phone, MapPin } from "lucide-react";
 import { Logo } from "../Logo";
 
 const cols = [
@@ -7,15 +7,17 @@ const cols = [
     links: [
       "Managed IT Services",
       "IT Support & Maintenance",
-      "Network & Infrastructure",
+      "IT Consulting",
+      "Network Infrastructure",
       "Microsoft 365",
-      "Cloud & Server",
+      "Azure & Cloud",
       "Cybersecurity",
+      "CCTV Integration",
     ],
   },
   {
     title: "Company",
-    links: ["About", "Process", "Case Studies", "FAQ", "Contact"],
+    links: ["About", "References", "Why Eclipse", "FAQ", "Contact"],
   },
 ];
 
@@ -27,22 +29,17 @@ export const Footer = () => {
           <div>
             <Logo light />
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/55">
-              Eclipse Mühendislik is an engineering-led IT consulting and managed services company
-              based in Turkey, supporting SMEs and growing organizations with reliable, scalable
-              technology operations.
+              Eclipse Mühendislik is an engineering-led IT consulting and managed services company based
+              in Turkey, supporting SMEs and growing organizations with reliable, scalable technology
+              operations.
             </p>
-            <div className="mt-6 flex items-center gap-3">
-              {[Linkedin, Twitter, Github].map((Icon, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  aria-label="Social link"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] transition-colors hover:bg-white/10 hover:text-white"
-                >
-                  <Icon className="h-4 w-4" />
-                </a>
-              ))}
-            </div>
+            <a
+              href="#"
+              aria-label="LinkedIn"
+              className="mt-6 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <Linkedin className="h-4 w-4" />
+            </a>
           </div>
 
           {cols.map((c) => (
@@ -53,9 +50,7 @@ export const Footer = () => {
               <ul className="mt-5 space-y-3 text-sm">
                 {c.links.map((l) => (
                   <li key={l}>
-                    <a href="#" className="transition-colors hover:text-white">
-                      {l}
-                    </a>
+                    <a href="#" className="transition-colors hover:text-white">{l}</a>
                   </li>
                 ))}
               </ul>
@@ -67,9 +62,20 @@ export const Footer = () => {
               Contact
             </h4>
             <ul className="mt-5 space-y-3 text-sm">
-              <li>hello@eclipse-muhendislik.com</li>
-              <li>+90 (000) 000 00 00</li>
-              <li className="text-white/55">Istanbul, Turkey</li>
+              <li className="flex items-start gap-2.5">
+                <Mail className="mt-0.5 h-4 w-4 text-electric-bright" />
+                <a href="mailto:hello@eclipse-muhendislik.com" className="hover:text-white">
+                  hello@eclipse-muhendislik.com
+                </a>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Phone className="mt-0.5 h-4 w-4 text-electric-bright" />
+                <a href="tel:+900000000000" className="hover:text-white">+90 (000) 000 00 00</a>
+              </li>
+              <li className="flex items-start gap-2.5 text-white/55">
+                <MapPin className="mt-0.5 h-4 w-4 text-electric-bright" />
+                Levent, Istanbul · Turkey
+              </li>
             </ul>
           </div>
         </div>
