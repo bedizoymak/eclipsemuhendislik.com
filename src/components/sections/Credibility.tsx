@@ -17,7 +17,7 @@ export const Credibility = () => {
           <div>
             <span className="eyebrow">Credibility</span>
             <h2 className="section-title mt-4">
-              Technology-focused, vendor-aware, solution-driven.
+              Technology-focused, vendor-aware, engineering-driven.
             </h2>
             <p className="mt-5 text-base leading-relaxed text-muted-foreground">
               We help businesses make practical technology decisions across infrastructure, cloud

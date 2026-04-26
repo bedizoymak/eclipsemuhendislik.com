@@ -4,63 +4,64 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Eclipse Mühendislik — premium corporate IT engineering design system.
-   White / dark navy / electric blue palette. All colors HSL. */
+/* Eclipse Engineering — premium corporate IT consulting design system.
+   Dark navy #0B1C2C / white / electric blue #007BFF. All colors HSL. */
 
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --foreground: 210 45% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 210 45% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 210 45% 11%;
 
-    /* Brand */
-    --navy: 222 60% 10%;
-    --navy-deep: 222 70% 7%;
-    --navy-soft: 222 40% 18%;
-    --electric: 215 95% 55%;
-    --electric-bright: 210 100% 62%;
-    --electric-soft: 215 90% 96%;
+    /* Brand — #0B1C2C navy, #007BFF electric blue */
+    --navy: 210 60% 11%;          /* #0B1C2C */
+    --navy-deep: 210 65% 7%;
+    --navy-soft: 210 40% 18%;
+    --electric: 211 100% 50%;     /* #007BFF */
+    --electric-bright: 210 100% 60%;
+    --electric-soft: 211 100% 96%;
 
-    --primary: 222 60% 10%;
+    --primary: 210 60% 11%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 90% 96%;
-    --secondary-foreground: 222 60% 10%;
+    --secondary: 210 40% 97%;
+    --secondary-foreground: 210 60% 11%;
 
-    --muted: 215 30% 96%;
-    --muted-foreground: 215 16% 42%;
+    --muted: 210 30% 96%;
+    --muted-foreground: 210 14% 42%;
 
-    --accent: 215 95% 55%;
+    --accent: 211 100% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 25% 90%;
-    --input: 215 25% 90%;
-    --ring: 215 95% 55%;
+    --border: 210 25% 91%;
+    --input: 210 25% 91%;
+    --ring: 211 100% 50%;
 
     --radius: 0.875rem;
 
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(222 70% 7%) 0%, hsl(222 60% 12%) 55%, hsl(215 90% 22%) 100%);
-    --gradient-electric: linear-gradient(135deg, hsl(215 95% 55%) 0%, hsl(210 100% 62%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(215 30% 98%) 100%);
-    --gradient-navy-fade: linear-gradient(180deg, hsl(222 70% 7%) 0%, hsl(222 60% 10%) 100%);
-    --gradient-mesh: radial-gradient(at 20% 20%, hsl(215 95% 55% / 0.18) 0px, transparent 50%),
-                     radial-gradient(at 80% 0%, hsl(210 100% 62% / 0.12) 0px, transparent 50%),
-                     radial-gradient(at 70% 80%, hsl(215 95% 55% / 0.10) 0px, transparent 50%);
+    --gradient-hero: linear-gradient(135deg, hsl(210 65% 6%) 0%, hsl(210 60% 11%) 55%, hsl(211 80% 22%) 100%);
+    --gradient-electric: linear-gradient(135deg, hsl(211 100% 50%) 0%, hsl(210 100% 62%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 30% 98%) 100%);
+    --gradient-navy-fade: linear-gradient(180deg, hsl(210 65% 7%) 0%, hsl(210 60% 11%) 100%);
+    --gradient-mesh: radial-gradient(at 20% 20%, hsl(211 100% 50% / 0.22) 0px, transparent 50%),
+                     radial-gradient(at 80% 0%, hsl(210 100% 62% / 0.14) 0px, transparent 50%),
+                     radial-gradient(at 70% 80%, hsl(211 100% 50% / 0.12) 0px, transparent 50%);
+    --gradient-section: linear-gradient(180deg, hsl(210 40% 99%) 0%, hsl(0 0% 100%) 100%);
 
     /* Shadows */
-    --shadow-soft: 0 1px 2px hsl(222 60% 10% / 0.04), 0 4px 16px hsl(222 60% 10% / 0.04);
-    --shadow-card: 0 2px 4px hsl(222 60% 10% / 0.04), 0 12px 32px hsl(222 60% 10% / 0.06);
-    --shadow-elevated: 0 8px 24px hsl(222 60% 10% / 0.08), 0 24px 64px hsl(222 60% 10% / 0.12);
-    --shadow-glow: 0 10px 40px -10px hsl(215 95% 55% / 0.45);
+    --shadow-soft: 0 1px 2px hsl(210 60% 11% / 0.04), 0 4px 16px hsl(210 60% 11% / 0.04);
+    --shadow-card: 0 2px 4px hsl(210 60% 11% / 0.04), 0 12px 32px hsl(210 60% 11% / 0.07);
+    --shadow-elevated: 0 8px 24px hsl(210 60% 11% / 0.08), 0 24px 64px hsl(210 60% 11% / 0.14);
+    --shadow-glow: 0 10px 40px -10px hsl(211 100% 50% / 0.50);
 
     /* Motion */
     --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -94,15 +95,37 @@
     @apply inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-accent;
   }
   .section-title {
-    @apply text-3xl md:text-4xl lg:text-5xl font-semibold leading-[1.1] text-foreground;
+    @apply text-3xl md:text-4xl lg:text-[2.75rem] font-semibold leading-[1.1] text-foreground;
   }
   .section-sub {
-    @apply mt-4 text-base md:text-lg text-muted-foreground max-w-2xl;
+    @apply mt-4 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed;
   }
   .grid-pattern {
     background-image:
-      linear-gradient(hsl(0 0% 100% / 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(0 0% 100% / 0.05) 1px, transparent 1px);
+      linear-gradient(hsl(0 0% 100% / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(0 0% 100% / 0.06) 1px, transparent 1px);
     background-size: 56px 56px;
+  }
+  .glass {
+    @apply border border-white/10 bg-white/[0.04] backdrop-blur-xl;
+  }
+  .glass-light {
+    @apply border border-border/70 bg-white/70 backdrop-blur-md;
+  }
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-elevated hover:border-accent/40;
+  }
+}
+
+/* Reveal on scroll */
+@layer utilities {
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.in-view {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

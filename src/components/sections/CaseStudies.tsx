@@ -1,32 +1,41 @@
-import { ArrowUpRight, Factory, Briefcase, Store } from "lucide-react";
+import { ArrowUpRight, Building2, Factory, Video, Lock } from "lucide-react";
 
 const cases = [
   {
+    icon: Building2,
+    sector: "Corporate Office",
+    company: "Office Network Setup",
+    challenge:
+      "Multi-floor office with unstable Wi-Fi, ad-hoc switching and no segmentation between guest and corporate traffic.",
+    services: ["Structured cabling", "Switching & VLANs", "Enterprise Wi-Fi"],
+    outcome: "Stable, segmented network with consistent coverage across every floor and meeting room.",
+  },
+  {
     icon: Factory,
     sector: "Manufacturing",
-    company: "Anadolu Üretim A.Ş.",
+    company: "Factory IT Infrastructure",
     challenge:
-      "Recurring network instability across the production floor and inconsistent endpoint configurations causing daily downtime.",
+      "Production floor downtime caused by aging network hardware and inconsistent endpoint configurations.",
     services: ["Network redesign", "Endpoint standardization", "Managed support"],
     outcome: "Stable infrastructure, standardized devices and continuous IT support coverage.",
   },
   {
-    icon: Briefcase,
-    sector: "Professional Services",
-    company: "Marmara Danışmanlık",
+    icon: Video,
+    sector: "Retail · Multi-site",
+    company: "CCTV & Surveillance Systems",
     challenge:
-      "Microsoft 365 tenant misconfigurations, fragmented email security and endpoint management gaps across consultants.",
-    services: ["M365 administration", "Identity & MFA", "Endpoint management"],
-    outcome: "Secure collaboration, hardened identities and a smoother day-to-day support experience.",
+      "Fragmented camera systems across branches with no centralized recording or remote visibility.",
+    services: ["IP camera rollout", "NVR centralization", "Remote viewing"],
+    outcome: "Unified surveillance with centralized recording and secure remote access.",
   },
   {
-    icon: Store,
-    sector: "Retail · Multi-branch",
-    company: "Ege Perakende Group",
+    icon: Lock,
+    sector: "Professional Services",
+    company: "Remote Access & VPN",
     challenge:
-      "Weak inter-branch connectivity and fragmented camera/network systems with no centralized visibility or support.",
-    services: ["Branch connectivity", "CCTV integration", "Centralized support"],
-    outcome: "Centralized operations, consistent uptime and unified visibility across all branches.",
+      "Distributed consultants needed secure access to internal systems without compromising identity controls.",
+    services: ["Firewall VPN", "MFA & identity", "Endpoint hardening"],
+    outcome: "Secure, audited remote access with zero impact on user productivity.",
   },
 ];
 
@@ -36,8 +45,8 @@ export const CaseStudies = () => {
       <div className="container-page">
         <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <div className="max-w-2xl">
-            <span className="eyebrow">References</span>
-            <h2 className="section-title mt-4">Practical results across industries.</h2>
+            <span className="eyebrow">Projects</span>
+            <h2 className="section-title mt-4">Real engineering, real environments.</h2>
           </div>
           <p className="section-sub md:mt-0 md:max-w-md md:text-right">
             A look at how we stabilize, secure and operate IT environments for companies that depend on
@@ -45,14 +54,15 @@ export const CaseStudies = () => {
           </p>
         </div>
 
-        <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {cases.map((c) => (
+        <div className="mt-14 grid gap-6 md:grid-cols-2">
+          {cases.map((c, i) => (
             <article
               key={c.company}
-              className="group flex flex-col rounded-2xl border border-border bg-card p-7 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-accent/30 hover:shadow-card"
+              className="reveal group flex flex-col rounded-2xl border border-border bg-card p-7 shadow-soft card-hover lg:p-8"
+              style={{ transitionDelay: `${i * 70}ms` }}
             >
               <div className="flex items-center justify-between">
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-electric-soft text-accent">
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-electric-soft text-accent transition-all group-hover:bg-gradient-electric group-hover:text-white group-hover:shadow-glow">
                   <c.icon className="h-5 w-5" />
                 </span>
                 <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -83,7 +93,7 @@ export const CaseStudies = () => {
               </div>
 
               <a href="#contact" className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-accent">
-                Discuss a similar engagement <ArrowUpRight className="h-4 w-4" />
+                Discuss a similar project <ArrowUpRight className="h-4 w-4" />
               </a>
             </article>
           ))}

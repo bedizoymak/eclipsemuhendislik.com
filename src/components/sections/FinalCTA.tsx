@@ -24,12 +24,12 @@ export const FinalCTA = () => {
 
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Button size="xl" variant="hero" asChild>
-              <a href="mailto:hello@eclipse-muhendislik.com">
+              <a href="mailto:hello@eclipse-engineering.com">
                 Contact Us <ArrowRight className="ml-1 h-4 w-4" />
               </a>
             </Button>
             <Button size="xl" variant="outline-light" asChild>
-              <a href="mailto:hello@eclipse-muhendislik.com">Request a Quote</a>
+              <a href="mailto:hello@eclipse-engineering.com">Request a Quote</a>
             </Button>
           </div>
 

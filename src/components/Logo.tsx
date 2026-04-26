@@ -6,7 +6,7 @@ export const Logo = ({ light = false }: { light?: boolean }) => (
       <Eclipse className="h-5 w-5 text-white" strokeWidth={2.25} />
     </span>
     <span className={`font-display text-lg font-semibold tracking-tight ${light ? "text-white" : "text-foreground"}`}>
-      Eclipse <span className="text-accent">Mühendislik</span>
+      Eclipse <span className="text-accent">Engineering</span>
     </span>
   </a>
 );

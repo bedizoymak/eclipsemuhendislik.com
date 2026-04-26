@@ -1,84 +1,120 @@
 import { ArrowRight, Zap, Headset, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/hero-dashboard.jpg";
 
 const trust = [
-  { icon: Zap, label: "Fast Response" },
-  { icon: Headset, label: "Remote & On-site Support" },
-  { icon: Layers, label: "Scalable IT Solutions" },
+  { icon: Zap, label: "Rapid Response" },
+  { icon: Headset, label: "Remote & On-site" },
+  { icon: Layers, label: "Scalable Architecture" },
 ];
+
+const NetworkBackdrop = () => (
+  <svg
+    className="absolute inset-0 h-full w-full opacity-[0.18]"
+    viewBox="0 0 1200 700"
+    preserveAspectRatio="xMidYMid slice"
+    aria-hidden
+  >
+    <defs>
+      <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stopColor="hsl(210 100% 70%)" stopOpacity="1" />
+        <stop offset="100%" stopColor="hsl(210 100% 70%)" stopOpacity="0" />
+      </radialGradient>
+      <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor="hsl(211 100% 60%)" stopOpacity="0.7" />
+        <stop offset="100%" stopColor="hsl(210 100% 70%)" stopOpacity="0.05" />
+      </linearGradient>
+    </defs>
+    {[
+      [120, 140], [300, 90], [520, 180], [760, 110], [980, 220], [1100, 120],
+      [200, 380], [440, 320], [680, 420], [880, 360], [1060, 460],
+      [140, 580], [380, 540], [620, 600], [840, 560], [1020, 620],
+    ].map(([x, y], i) => (
+      <g key={i}>
+        <circle cx={x} cy={y} r="22" fill="url(#nodeGlow)" />
+        <circle cx={x} cy={y} r="2.5" fill="hsl(210 100% 75%)" />
+      </g>
+    ))}
+    {[
+      [120, 140, 300, 90], [300, 90, 520, 180], [520, 180, 760, 110], [760, 110, 980, 220],
+      [200, 380, 440, 320], [440, 320, 680, 420], [680, 420, 880, 360], [880, 360, 1060, 460],
+      [120, 140, 200, 380], [520, 180, 440, 320], [760, 110, 680, 420], [980, 220, 880, 360],
+      [200, 380, 140, 580], [440, 320, 380, 540], [680, 420, 620, 600], [880, 360, 840, 560],
+      [380, 540, 620, 600], [620, 600, 840, 560], [840, 560, 1020, 620],
+    ].map(([x1, y1, x2, y2], i) => (
+      <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="url(#lineGrad)" strokeWidth="1" />
+    ))}
+  </svg>
+);
 
 export const Hero = () => {
   return (
-    <section id="top" className="relative isolate overflow-hidden bg-gradient-hero pt-28 pb-20 md:pt-36 md:pb-28">
-      <div className="absolute inset-0 bg-gradient-mesh" aria-hidden />
-      <div className="absolute inset-0 grid-pattern opacity-30" aria-hidden />
+    <section
+      id="top"
+      className="relative isolate overflow-hidden bg-gradient-hero pt-32 pb-24 md:pt-40 md:pb-32"
+    >
+      <div className="absolute inset-0 bg-gradient-mesh animate-drift" aria-hidden />
+      <div className="absolute inset-0 grid-pattern opacity-25" aria-hidden />
+      <NetworkBackdrop />
+      {/* Glow accents */}
+      <div
+        className="absolute -top-24 right-[-10%] h-[460px] w-[460px] rounded-full bg-electric/20 blur-[120px]"
+        aria-hidden
+      />
+      <div
+        className="absolute bottom-[-15%] left-[-8%] h-[420px] w-[420px] rounded-full bg-electric-bright/15 blur-[120px]"
+        aria-hidden
+      />
 
       <div className="container-page relative">
-        <div className="grid items-center gap-14 lg:grid-cols-[1.1fr_1fr]">
-          <div className="animate-fade-up">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/80 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-electric-bright animate-pulse-glow" />
-              Engineering-led Managed IT
+        <div className="mx-auto max-w-4xl text-center">
+          <span className="inline-flex animate-fade-in items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/85 backdrop-blur-md">
+            <span className="h-1.5 w-1.5 rounded-full bg-electric-bright animate-pulse-glow" />
+            Engineering-led IT Consulting · Turkey
+          </span>
+
+          <h1 className="mt-7 animate-slide-up font-display text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-[3.75rem]">
+            Engineering Reliable IT Infrastructure for{" "}
+            <span className="bg-gradient-to-r from-electric-bright via-white to-electric-bright bg-clip-text text-transparent">
+              Modern Businesses
             </span>
+            .
+          </h1>
 
-            <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-[3.5rem]">
-              Reliable IT Operations for{" "}
-              <span className="bg-gradient-to-r from-electric-bright to-white bg-clip-text text-transparent">
-                Growing Businesses
-              </span>{" "}
-              in Turkey.
-            </h1>
+          <p
+            className="mx-auto mt-7 max-w-2xl animate-slide-up text-lg leading-relaxed text-white/75"
+            style={{ animationDelay: "120ms" }}
+          >
+            We design, deploy and manage secure, scalable IT systems for companies that demand
+            performance, continuity and clarity from their technology operations.
+          </p>
 
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/70">
-              Eclipse Mühendislik helps SMEs and growing companies design, secure, support and modernize
-              their IT infrastructure with practical field expertise, responsive service and long-term
-              operational discipline.
-            </p>
-
-            <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Button size="xl" variant="hero" asChild>
-                <a href="#contact">
-                  Get a Quote <ArrowRight className="ml-1 h-4 w-4" />
-                </a>
-              </Button>
-              <Button size="xl" variant="outline-light" asChild>
-                <a href="#services">Explore Services</a>
-              </Button>
-            </div>
-
-            <ul className="mt-12 grid max-w-xl grid-cols-1 gap-3 border-t border-white/10 pt-8 sm:grid-cols-3 sm:gap-6">
-              {trust.map((t) => (
-                <li key={t.label} className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/5 text-electric-bright ring-1 ring-white/10">
-                    <t.icon className="h-4 w-4" />
-                  </span>
-                  <span className="text-sm font-medium text-white/85">{t.label}</span>
-                </li>
-              ))}
-            </ul>
+          <div
+            className="mt-10 flex animate-slide-up flex-wrap items-center justify-center gap-3"
+            style={{ animationDelay: "220ms" }}
+          >
+            <Button size="xl" variant="hero" asChild>
+              <a href="#contact">
+                Get a Quote <ArrowRight className="ml-1 h-4 w-4" />
+              </a>
+            </Button>
+            <Button size="xl" variant="outline-light" asChild>
+              <a href="#services">Explore Services</a>
+            </Button>
           </div>
 
-          <div className="relative animate-fade-in">
-            <div className="absolute -inset-6 rounded-[2rem] bg-gradient-electric opacity-20 blur-3xl" aria-hidden />
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-elevated">
-              <img
-                src={heroImage}
-                alt="IT operations dashboard showing network topology, server health and security monitoring for managed IT services"
-                width={1280}
-                height={1024}
-                className="h-full w-full object-cover"
-                loading="eager"
-              />
-              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-navy-deep/95 to-transparent" />
-              <div className="absolute bottom-5 left-5 right-5 flex items-center gap-3 rounded-xl border border-white/10 bg-navy/70 px-4 py-3 backdrop-blur-md">
-                <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-glow" />
-                <p className="text-xs font-medium text-white/85">
-                  Network · Cloud · Endpoint <span className="text-white/45">— continuously monitored</span>
-                </p>
-              </div>
-            </div>
-          </div>
+          <ul
+            className="mx-auto mt-14 grid max-w-2xl animate-slide-up grid-cols-1 gap-3 border-t border-white/10 pt-8 sm:grid-cols-3 sm:gap-6"
+            style={{ animationDelay: "320ms" }}
+          >
+            {trust.map((t) => (
+              <li key={t.label} className="flex items-center justify-center gap-2.5">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-electric-bright ring-1 ring-white/10">
+                  <t.icon className="h-4 w-4" />
+                </span>
+                <span className="text-sm font-medium text-white/85">{t.label}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>

@@ -7,31 +7,31 @@ import {
   ShieldCheck,
   Network,
   Mail,
-  CloudCog,
   Video,
+  Cpu,
 } from "lucide-react";
 
 const featured = {
   icon: Server,
   title: "Managed IT Services",
-  desc: "Ongoing monitoring, support, operational continuity and infrastructure ownership for companies that need a dependable outsourced IT partner.",
+  desc: "Continuous monitoring, support and infrastructure ownership for businesses that need a dependable, engineering-led IT partner.",
   bullets: [
-    "24/7 monitoring & proactive maintenance",
-    "Single accountable point of contact",
+    "Proactive monitoring & maintenance",
+    "Single accountable engineering team",
     "Documented standards & runbooks",
     "Predictable monthly engagement",
   ],
 };
 
 const services = [
-  { icon: LifeBuoy, title: "IT Support & Maintenance", desc: "Responsive helpdesk and preventive maintenance that keeps users productive and downtime minimal." },
+  { icon: Network, title: "Network Infrastructure", desc: "Switching, firewalls, structured cabling and Wi-Fi engineered for performance and uptime." },
+  { icon: ShieldCheck, title: "Cybersecurity", desc: "Endpoint protection, MFA, firewalls, backups and policy hardening built into every environment." },
+  { icon: Cloud, title: "Cloud & Server", desc: "Virtualization, hybrid cloud and Windows Server architectures designed for resilience and scale." },
+  { icon: LifeBuoy, title: "IT Support", desc: "Responsive helpdesk and preventive maintenance that keeps users productive and downtime minimal." },
+  { icon: Video, title: "CCTV Systems", desc: "IP camera systems, NVR setup and remote viewing integrated with your network infrastructure." },
+  { icon: Cpu, title: "Automation", desc: "Operational automation across endpoints, monitoring and routine IT tasks — fewer errors, faster delivery." },
+  { icon: Mail, title: "Microsoft 365", desc: "Tenant configuration, identity, email, Teams, SharePoint and ongoing M365 governance." },
   { icon: Lightbulb, title: "IT Consulting", desc: "Independent advisory on architecture, vendor selection, modernization and IT roadmaps." },
-  { icon: Cloud, title: "Cloud & Server Solutions", desc: "Virtualization, hybrid cloud and Windows Server environments designed for resilience and scale." },
-  { icon: ShieldCheck, title: "Cybersecurity", desc: "Foundational security: firewalls, endpoint protection, backups, MFA and policy hardening." },
-  { icon: Network, title: "Network Infrastructure", desc: "Structured cabling, switching, firewalls and Wi-Fi coverage engineered for performance." },
-  { icon: Mail, title: "Microsoft 365 Setup & Administration", desc: "Tenant configuration, identity, email, Teams, SharePoint and ongoing M365 governance." },
-  { icon: CloudCog, title: "Azure & Cloud Management", desc: "Workload deployment, identity, cost governance and operations across Azure environments." },
-  { icon: Video, title: "CCTV / Surveillance Integration", desc: "IP camera systems, NVR setup and remote viewing integrated with your network infrastructure." },
 ];
 
 export const Services = () => {
@@ -41,18 +41,18 @@ export const Services = () => {
         <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
           <div className="max-w-2xl">
             <span className="eyebrow">Services</span>
-            <h2 className="section-title mt-4">A full IT service portfolio, one accountable partner.</h2>
+            <h2 className="section-title mt-4">A complete IT portfolio, one accountable partner.</h2>
           </div>
           <p className="section-sub md:mt-0 md:max-w-md md:text-right">
-            From day-to-day support to infrastructure projects — coordinated under engineering-led
-            operations.
+            From day-to-day support to infrastructure engineering — coordinated under a single,
+            engineering-led operation.
           </p>
         </div>
 
         <div className="mt-14 grid gap-6 lg:grid-cols-3">
-          {/* Featured */}
           <article className="group relative overflow-hidden rounded-2xl bg-gradient-hero p-8 text-white shadow-elevated lg:row-span-2 lg:p-10">
             <div className="absolute inset-0 bg-gradient-mesh opacity-60" aria-hidden />
+            <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-electric/30 blur-3xl" aria-hidden />
             <div className="relative flex h-full flex-col">
               <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-electric-bright backdrop-blur">
                 Featured
@@ -83,20 +83,20 @@ export const Services = () => {
             </div>
           </article>
 
-          {/* Service grid */}
-          {services.map((s) => (
+          {services.map((s, i) => (
             <article
               key={s.title}
-              className="group flex flex-col rounded-2xl border border-border bg-card p-6 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-accent/30 hover:shadow-card"
+              className="reveal group flex flex-col rounded-2xl border border-border bg-card p-6 shadow-soft card-hover"
+              style={{ transitionDelay: `${i * 50}ms` }}
             >
-              <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-electric-soft text-accent transition-colors group-hover:bg-gradient-electric group-hover:text-white">
+              <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-electric-soft text-accent transition-all duration-300 group-hover:bg-gradient-electric group-hover:text-white group-hover:shadow-glow">
                 <s.icon className="h-5 w-5" />
               </div>
               <h3 className="font-display text-lg font-semibold text-foreground">{s.title}</h3>
               <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
               <a
                 href="#contact"
-                className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-accent"
+                className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-accent transition-transform group-hover:translate-x-0.5"
               >
                 Learn more <ArrowUpRight className="h-4 w-4" />
               </a>
