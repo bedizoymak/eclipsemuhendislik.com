@@ -353,13 +353,6 @@ export const translations = {
       cookies: "Çerez Politikası",
     },
   },
-} as const;
+};
 
-type DeepReadonly<T> = T extends (infer U)[]
-  ? ReadonlyArray<DeepReadonly<U>>
-  : T extends object
-  ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
-  : T;
-export type Translations = DeepReadonly<{
-  [K in keyof typeof translations.en]: typeof translations.en[K];
-}>;
+export type Translations = (typeof translations)["en"];
