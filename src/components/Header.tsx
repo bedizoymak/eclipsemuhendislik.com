@@ -2,44 +2,47 @@ import { useEffect, useState } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "./Logo";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useLang } from "@/i18n/LanguageContext";
 
 type SubLink = { label: string; href: string; desc?: string };
 type NavItem = { label: string; href?: string; children?: SubLink[] };
 
-const nav: NavItem[] = [
-  {
-    label: "IT Services",
-    children: [
-      { label: "IT Support & Maintenance", href: "#services", desc: "Helpdesk, preventive maintenance, on-site." },
-      { label: "IT Consulting", href: "#services", desc: "Architecture and modernization advisory." },
-      { label: "Managed IT Services", href: "#services", desc: "Full-environment ownership and operations." },
-    ],
-  },
-  {
-    label: "Cloud Services",
-    children: [
-      { label: "Cloud & Server Solutions", href: "#services", desc: "Virtualization, hybrid cloud, Windows Server." },
-      { label: "Cybersecurity", href: "#services", desc: "Endpoint, firewall, MFA, backups." },
-      { label: "Network Infrastructure", href: "#services", desc: "Switching, firewalls, Wi-Fi coverage." },
-    ],
-  },
-  {
-    label: "Microsoft 365",
-    children: [
-      { label: "Microsoft 365 Setup & Administration", href: "#services", desc: "Tenant, identity, Teams, SharePoint." },
-      { label: "Azure & Cloud Management", href: "#services", desc: "Workloads, identity and governance." },
-    ],
-  },
-  { label: "About", href: "#about" },
-  { label: "Resources", href: "#faq" },
-  { label: "Contact", href: "#contact" },
-];
-
 export const Header = () => {
+  const { t } = useLang();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileGroup, setMobileGroup] = useState<string | null>(null);
+
+  const nav: NavItem[] = [
+    {
+      label: t.nav.itServices,
+      children: [
+        { label: t.nav.items.support.label, href: "#services", desc: t.nav.items.support.desc },
+        { label: t.nav.items.consulting.label, href: "#services", desc: t.nav.items.consulting.desc },
+        { label: t.nav.items.managed.label, href: "#services", desc: t.nav.items.managed.desc },
+      ],
+    },
+    {
+      label: t.nav.cloudServices,
+      children: [
+        { label: t.nav.items.cloud.label, href: "#services", desc: t.nav.items.cloud.desc },
+        { label: t.nav.items.security.label, href: "#services", desc: t.nav.items.security.desc },
+        { label: t.nav.items.network.label, href: "#services", desc: t.nav.items.network.desc },
+      ],
+    },
+    {
+      label: t.nav.microsoft365,
+      children: [
+        { label: t.nav.items.m365.label, href: "#services", desc: t.nav.items.m365.desc },
+        { label: t.nav.items.azure.label, href: "#services", desc: t.nav.items.azure.desc },
+      ],
+    },
+    { label: t.nav.about, href: "#why" },
+    { label: t.nav.resources, href: "#faq" },
+    { label: t.nav.contact, href: "#contact" },
+  ];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -107,19 +110,23 @@ export const Header = () => {
           )}
         </nav>
 
-        <div className="hidden lg:flex">
+        <div className="hidden items-center gap-3 lg:flex">
+          <LanguageSwitcher light={!scrolled} />
           <Button variant="hero" size="sm" asChild>
-            <a href="#contact">Get a Quote</a>
+            <a href="#contact">{t.nav.getQuote}</a>
           </Button>
         </div>
 
-        <button
-          aria-label="Toggle menu"
-          className={`lg:hidden p-2 -mr-2 ${scrolled ? "text-foreground" : "text-white"}`}
-          onClick={() => setOpen((o) => !o)}
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <LanguageSwitcher light={!scrolled} />
+          <button
+            aria-label="Toggle menu"
+            className={`p-2 -mr-2 ${scrolled ? "text-foreground" : "text-white"}`}
+            onClick={() => setOpen((o) => !o)}
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       {open && (
@@ -164,7 +171,7 @@ export const Header = () => {
               ),
             )}
             <Button variant="hero" size="sm" className="mt-3" asChild>
-              <a href="#contact" onClick={() => setOpen(false)}>Get a Quote</a>
+              <a href="#contact" onClick={() => setOpen(false)}>{t.nav.getQuote}</a>
             </Button>
           </nav>
         </div>
