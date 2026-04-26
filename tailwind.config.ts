@@ -66,6 +66,7 @@ export default {
         "gradient-card": "var(--gradient-card)",
         "gradient-navy-fade": "var(--gradient-navy-fade)",
         "gradient-mesh": "var(--gradient-mesh)",
+        "gradient-section": "var(--gradient-section)",
       },
       boxShadow: {
         soft: "var(--shadow-soft)",
@@ -93,13 +94,23 @@ export default {
           "0%, 100%": { opacity: "0.6" },
           "50%": { opacity: "1" },
         },
+        "slide-up": {
+          "0%": { opacity: "0", transform: "translateY(28px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "drift": {
+          "0%, 100%": { transform: "translate(0,0)" },
+          "50%": { transform: "translate(20px,-15px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-up": "fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both",
         "fade-in": "fade-in 0.6s ease-out both",
+        "slide-up": "slide-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both",
         "pulse-glow": "pulse-glow 3s ease-in-out infinite",
+        "drift": "drift 12s ease-in-out infinite",
       },
     },
   },
