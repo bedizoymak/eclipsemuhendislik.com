@@ -42,6 +42,12 @@ const NetworkBackdrop = () => (
 );
 
 export const Hero = () => {
+  const { t } = useLang();
+  const trust = [
+    { icon: Zap, label: t.hero.trust.rapid },
+    { icon: Headset, label: t.hero.trust.remote },
+    { icon: Layers, label: t.hero.trust.scalable },
+  ];
   return (
     <section
       id="top"
@@ -64,13 +70,13 @@ export const Hero = () => {
         <div className="mx-auto max-w-4xl text-center">
           <span className="inline-flex animate-fade-in items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/85 backdrop-blur-md">
             <span className="h-1.5 w-1.5 rounded-full bg-electric-bright animate-pulse-glow" />
-            Engineering-led IT Consulting · Turkey
+            {t.hero.badge}
           </span>
 
           <h1 className="mt-7 animate-slide-up font-display text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-[3.75rem]">
-            Engineering Reliable IT Infrastructure for{" "}
+            {t.hero.title1}
             <span className="bg-gradient-to-r from-electric-bright via-white to-electric-bright bg-clip-text text-transparent">
-              Modern Businesses
+              {t.hero.titleAccent}
             </span>
             .
           </h1>
@@ -79,8 +85,7 @@ export const Hero = () => {
             className="mx-auto mt-7 max-w-2xl animate-slide-up text-lg leading-relaxed text-white/75"
             style={{ animationDelay: "120ms" }}
           >
-            We design, deploy and manage secure, scalable IT systems for companies that demand
-            performance, continuity and clarity from their technology operations.
+            {t.hero.subtitle}
           </p>
 
           <div
@@ -89,11 +94,11 @@ export const Hero = () => {
           >
             <Button size="xl" variant="hero" asChild>
               <a href="#contact">
-                Get a Quote <ArrowRight className="ml-1 h-4 w-4" />
+                {t.hero.ctaQuote} <ArrowRight className="ml-1 h-4 w-4" />
               </a>
             </Button>
             <Button size="xl" variant="outline-light" asChild>
-              <a href="#services">Explore Services</a>
+              <a href="#services">{t.hero.ctaServices}</a>
             </Button>
           </div>
 
