@@ -29,8 +29,8 @@ export const Footer = () => {
           <div>
             <Logo light />
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/55">
-              Eclipse Mühendislik is an engineering-led IT consulting and managed services company based
-              in Turkey, supporting SMEs and growing organizations with reliable, scalable technology
+              Eclipse Engineering is an engineering-led IT consulting and managed services company based
+              in Turkey, supporting growing organizations with reliable, secure and scalable technology
               operations.
             </p>
             <a
@@ -64,8 +64,8 @@ export const Footer = () => {
             <ul className="mt-5 space-y-3 text-sm">
               <li className="flex items-start gap-2.5">
                 <Mail className="mt-0.5 h-4 w-4 text-electric-bright" />
-                <a href="mailto:hello@eclipse-muhendislik.com" className="hover:text-white">
-                  hello@eclipse-muhendislik.com
+                <a href="mailto:hello@eclipse-engineering.com" className="hover:text-white">
+                  hello@eclipse-engineering.com
                 </a>
               </li>
               <li className="flex items-start gap-2.5">
@@ -81,7 +81,7 @@ export const Footer = () => {
         </div>
 
         <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-white/5 pt-8 text-xs text-white/45 sm:flex-row sm:items-center">
-          <p>© {new Date().getFullYear()} Eclipse Mühendislik. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Eclipse Engineering. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <a href="#" className="hover:text-white">Privacy</a>
             <a href="#" className="hover:text-white">Terms</a>
