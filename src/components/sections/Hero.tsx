@@ -1,11 +1,6 @@
 import { ArrowRight, Zap, Headset, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const trust = [
-  { icon: Zap, label: "Rapid Response" },
-  { icon: Headset, label: "Remote & On-site" },
-  { icon: Layers, label: "Scalable Architecture" },
-];
+import { useLang } from "@/i18n/LanguageContext";
 
 const NetworkBackdrop = () => (
   <svg
