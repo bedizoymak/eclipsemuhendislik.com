@@ -59,7 +59,7 @@ export const Header = () => {
           : "bg-transparent"
       }`}
     >
-      <div className="container-page flex h-16 items-center justify-between md:h-20">
+      <div className="container-page flex h-20 items-center justify-between md:h-24 lg:h-28">
         <Logo light={!scrolled} />
 
         <nav className="hidden items-center gap-1 lg:flex">
