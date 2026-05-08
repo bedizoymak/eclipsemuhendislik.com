@@ -1,5 +1,5 @@
 import { Linkedin, Mail, Phone, MapPin, MessageCircle, Navigation } from "lucide-react";
-import { Logo } from "../Logo";
+import logoDark from "@/assets/logo-dark-bg.png";
 import { useLang } from "@/i18n/LanguageContext";
 import { CONTACT } from "@/i18n/translations";
 
@@ -15,7 +15,9 @@ export const Footer = () => {
       <div className="container-page py-16">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr]">
           <div>
-            <Logo light />
+            <a href="#top" aria-label="Eclipse Mühendislik" className="inline-block">
+              <img src={logoDark} alt="Eclipse Mühendislik" className="h-auto w-[180px] lg:w-[200px] select-none" draggable={false} />
+            </a>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/55">{t.footer.desc}</p>
             <div className="mt-6 flex items-center gap-3">
               <a
