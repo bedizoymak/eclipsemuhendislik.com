@@ -1,12 +1,13 @@
-import { Eclipse } from "lucide-react";
+import logoDark from "@/assets/logo-dark-bg.png";
+import logoLight from "@/assets/logo-light-bg.png";
 
-export const Logo = ({ light = false }: { light?: boolean }) => (
-  <a href="#top" className="group flex items-center gap-2.5">
-    <span className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-electric shadow-glow">
-      <Eclipse className="h-5 w-5 text-white" strokeWidth={2.25} />
-    </span>
-    <span className={`font-display text-lg font-semibold tracking-tight ${light ? "text-white" : "text-foreground"}`}>
-      Eclipse <span className="text-accent">Engineering</span>
-    </span>
+export const Logo = ({ light = false, className = "" }: { light?: boolean; className?: string }) => (
+  <a href="#top" className={`flex items-center ${className}`} aria-label="Eclipse Mühendislik">
+    <img
+      src={light ? logoDark : logoLight}
+      alt="Eclipse Mühendislik"
+      className="h-10 w-auto md:h-12 lg:h-14 select-none"
+      draggable={false}
+    />
   </a>
 );
