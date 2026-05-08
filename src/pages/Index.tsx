@@ -9,6 +9,7 @@ import { Credibility } from "@/components/sections/Credibility";
 import { FAQ } from "@/components/sections/FAQ";
 import { FinalCTA } from "@/components/sections/FinalCTA";
 import { Footer } from "@/components/sections/Footer";
+import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { useReveal } from "@/hooks/use-reveal";
 
 const Index = () => {
@@ -28,6 +29,7 @@ const Index = () => {
         <FinalCTA />
       </main>
       <Footer />
+      <WhatsAppFloat />
     </div>
   );
 };
