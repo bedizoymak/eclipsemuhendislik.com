@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# Bediz Ebru mühendislik
 
 TODO: Document your project here
