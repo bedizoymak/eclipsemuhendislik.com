@@ -11,12 +11,12 @@ const NetworkBackdrop = () => (
   >
     <defs>
       <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stopColor="hsl(210 100% 70%)" stopOpacity="1" />
-        <stop offset="100%" stopColor="hsl(210 100% 70%)" stopOpacity="0" />
+        <stop offset="0%" stopColor="hsl(var(--electric-bright))" stopOpacity="1" />
+        <stop offset="100%" stopColor="hsl(var(--electric-bright))" stopOpacity="0" />
       </radialGradient>
       <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stopColor="hsl(211 100% 60%)" stopOpacity="0.7" />
-        <stop offset="100%" stopColor="hsl(210 100% 70%)" stopOpacity="0.05" />
+        <stop offset="0%" stopColor="hsl(var(--electric))" stopOpacity="0.7" />
+        <stop offset="100%" stopColor="hsl(var(--electric-bright))" stopOpacity="0.05" />
       </linearGradient>
     </defs>
     {[
@@ -26,7 +26,7 @@ const NetworkBackdrop = () => (
     ].map(([x, y], i) => (
       <g key={i}>
         <circle cx={x} cy={y} r="22" fill="url(#nodeGlow)" />
-        <circle cx={x} cy={y} r="2.5" fill="hsl(210 100% 75%)" />
+        <circle cx={x} cy={y} r="2.5" fill="hsl(var(--electric-bright))" />
       </g>
     ))}
     {[
