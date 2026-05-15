@@ -75,9 +75,7 @@ export const Hero = () => {
 
           <h1 className="mt-7 animate-slide-up font-display text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-[3.75rem]">
             {t.hero.title1}
-            <span className="bg-gradient-to-r from-electric-bright via-white to-electric-bright bg-clip-text text-transparent">
-              {t.hero.titleAccent}
-            </span>
+            <span>{t.hero.titleAccent}</span>
             .
           </h1>
 

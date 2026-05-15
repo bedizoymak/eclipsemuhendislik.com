@@ -11,6 +11,7 @@ type NavItem = { label: string; href?: string; children?: SubLink[] };
 export const Header = () => {
   const { t } = useLang();
   const [scrolled, setScrolled] = useState(false);
+  const [overFooter, setOverFooter] = useState(false);
   const [open, setOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileGroup, setMobileGroup] = useState<string | null>(null);
@@ -45,7 +46,11 @@ export const Header = () => {
   ];
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 24);
+      const footer = document.querySelector("footer");
+      setOverFooter(Boolean(footer && footer.getBoundingClientRect().top <= 112));
+    };
     onScroll();
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
@@ -54,13 +59,15 @@ export const Header = () => {
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled
+        overFooter
+          ? "bg-navy backdrop-blur-lg border-b border-white/10 shadow-soft"
+          : scrolled
           ? "bg-background/90 backdrop-blur-lg border-b border-border shadow-soft"
           : "bg-transparent"
       }`}
     >
       <div className="container-page flex h-20 items-center justify-between md:h-24 lg:h-28">
-        <Logo light={!scrolled} />
+        <Logo light={!scrolled || overFooter} />
 
         <nav className="hidden items-center gap-1 lg:flex">
           {nav.map((item) =>
@@ -73,7 +80,7 @@ export const Header = () => {
               >
                 <button
                   className={`flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                    scrolled ? "text-foreground/80 hover:text-foreground" : "text-white/80 hover:text-white"
+                    overFooter ? "text-white/80 hover:text-white" : scrolled ? "text-foreground/80 hover:text-foreground" : "text-white/80 hover:text-white"
                   }`}
                 >
                   {item.label}
@@ -101,7 +108,7 @@ export const Header = () => {
                 key={item.label}
                 href={item.href}
                 className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  scrolled ? "text-foreground/80 hover:text-foreground" : "text-white/80 hover:text-white"
+                  overFooter ? "text-white/80 hover:text-white" : scrolled ? "text-foreground/80 hover:text-foreground" : "text-white/80 hover:text-white"
                 }`}
               >
                 {item.label}
@@ -111,17 +118,17 @@ export const Header = () => {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <LanguageSwitcher light={!scrolled} />
+          <LanguageSwitcher light={!scrolled || overFooter} />
           <Button variant="hero" size="sm" asChild>
             <a href="#contact">{t.nav.getQuote}</a>
           </Button>
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
-          <LanguageSwitcher light={!scrolled} />
+          <LanguageSwitcher light={!scrolled || overFooter} />
           <button
             aria-label="Toggle menu"
-            className={`p-2 -mr-2 ${scrolled ? "text-foreground" : "text-white"}`}
+            className={`p-2 -mr-2 ${overFooter ? "text-white" : scrolled ? "text-foreground" : "text-white"}`}
             onClick={() => setOpen((o) => !o)}
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

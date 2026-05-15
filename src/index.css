@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 /* Eclipse Mühendislik — premium corporate IT consulting design system.
-   Logo palette: deep navy #102030 / cyan-blue #3588AD / bright cyan #50D0F8 / silver white #F0F0F0. All colors HSL. */
+   Logo palette: deep navy #0B1A2D / cyan-blue #3588AD / bright cyan #50D0F8 / silver white #F0F0F0. All colors HSL. */
 
 @layer base {
   :root {
@@ -19,7 +19,7 @@
     --popover-foreground: 210 50% 13%;
 
     /* Brand colors pulled from the Eclipse logo assets */
-    --navy: 210 50% 13%;          /* #102030 */
+    --navy: 213.5 60.7% 11%;      /* #0B1A2D */
     --navy-deep: 210 100% 6%;     /* #001020 */
     --navy-soft: 210 33% 19%;     /* #203040 */
     --electric: 198 53% 44%;      /* #3588AD */
@@ -48,10 +48,10 @@
     --radius: 0.875rem;
 
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(210 100% 6%) 0%, hsl(210 50% 13%) 58%, hsl(198 53% 22%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(210 100% 6%) 0%, hsl(var(--navy)) 58%, hsl(198 53% 22%) 100%);
     --gradient-electric: linear-gradient(135deg, hsl(198 53% 44%) 0%, hsl(194 92% 64%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(200 25% 97%) 100%);
-    --gradient-navy-fade: linear-gradient(180deg, hsl(210 100% 6%) 0%, hsl(210 50% 13%) 100%);
+    --gradient-navy-fade: linear-gradient(180deg, hsl(210 100% 6%) 0%, hsl(var(--navy)) 100%);
     --gradient-mesh: radial-gradient(at 20% 20%, hsl(198 53% 44% / 0.24) 0px, transparent 50%),
                      radial-gradient(at 80% 0%, hsl(194 92% 64% / 0.14) 0px, transparent 50%),
                      radial-gradient(at 70% 80%, hsl(198 53% 44% / 0.12) 0px, transparent 50%);

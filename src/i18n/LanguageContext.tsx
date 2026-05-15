@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, ReactNode } from "react";
 import { translations, type Lang, type Translations } from "./translations";
 
 type Ctx = {
@@ -9,30 +9,16 @@ type Ctx = {
 
 const LanguageContext = createContext<Ctx | undefined>(undefined);
 
-const STORAGE_KEY = "eclipse-lang";
-
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [lang, setLangState] = useState<Lang>("en");
-
-  useEffect(() => {
-    const saved = (typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null) as Lang | null;
-    if (saved === "en" || saved === "tr") setLangState(saved);
-  }, []);
+  const lang: Lang = "tr";
 
   useEffect(() => {
     if (typeof document !== "undefined") {
-      document.documentElement.lang = lang;
+      document.documentElement.lang = "tr";
     }
-  }, [lang]);
+  }, []);
 
-  const setLang = (l: Lang) => {
-    setLangState(l);
-    try {
-      localStorage.setItem(STORAGE_KEY, l);
-    } catch {
-      /* ignore */
-    }
-  };
+  const setLang = () => undefined;
 
   return (
     <LanguageContext.Provider value={{ lang, setLang, t: translations[lang] }}>

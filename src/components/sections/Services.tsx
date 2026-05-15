@@ -11,13 +11,15 @@ import {
   Cpu,
 } from "lucide-react";
 import { useLang } from "@/i18n/LanguageContext";
+import { usePublicServices } from "@/hooks/useEclipseData";
 
 const icons = [Network, ShieldCheck, Cloud, LifeBuoy, Video, Cpu, Mail, Lightbulb];
 
 export const Services = () => {
   const { t } = useLang();
+  const { services: dynamicServices } = usePublicServices();
   const featured = t.services.featured;
-  const services = t.services.items.map((s, i) => ({ ...s, icon: icons[i] }));
+  const services = dynamicServices.slice(0, 8).map((s, i) => ({ title: s.title, desc: s.short_description, icon: icons[i % icons.length] }));
 
   return (
     <section id="services" className="relative bg-secondary/40 py-24 md:py-32">

@@ -1,11 +1,20 @@
 import { ArrowUpRight, Building2, Factory, Video, Lock } from "lucide-react";
 import { useLang } from "@/i18n/LanguageContext";
+import { usePublicProjects } from "@/hooks/useEclipseData";
 
 const icons = [Building2, Factory, Video, Lock];
 
 export const CaseStudies = () => {
   const { t } = useLang();
-  const cases = t.cases.items.map((c, i) => ({ ...c, icon: icons[i] }));
+  const { projects } = usePublicProjects();
+  const cases = projects.slice(0, 4).map((project, i) => ({
+    sector: project.category || "BT Projesi",
+    company: project.title,
+    challenge: project.short_description,
+    services: project.detail_description ? project.detail_description.split("\n").filter(Boolean).slice(0, 3) : [project.category || "BT Danışmanlığı"],
+    outcome: project.detail_description || project.short_description,
+    icon: icons[i % icons.length],
+  }));
 
   return (
     <section id="cases" className="bg-background py-24 md:py-28">
