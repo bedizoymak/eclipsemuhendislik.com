@@ -9,14 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 
-const TEMP_ADMIN_EMAIL = "admin@eclipsemuhendislik.com";
-
-function normalizeLoginIdentifier(identifier: string) {
-  const trimmed = identifier.trim();
-  // TODO: Replace temporary admin credentials before production.
-  return trimmed.toLowerCase() === "admin" ? TEMP_ADMIN_EMAIL : trimmed;
-}
-
 function getAuthErrorMessage(error: unknown) {
   if (error instanceof Error) {
     const message = error.message.toLowerCase();
@@ -31,6 +23,19 @@ function getAuthErrorMessage(error: unknown) {
   }
 
   return "Giriş sırasında bir auth hatası oluştu. Lütfen tekrar deneyin.";
+}
+
+async function logMissingAdminRoleDebug(user: { id: string; email?: string }) {
+  if (!import.meta.env.DEV || !supabase) return;
+
+  const { data: matchingRows, error } = await supabase.from("user_roles").select("user_id, role").eq("user_id", user.id);
+
+  console.debug("[admin-login] admin role not found", {
+    currentAuthUserId: user.id,
+    currentAuthUserEmail: user.email,
+    matchingUserRolesRows: matchingRows,
+    matchingUserRolesError: error,
+  });
 }
 
 export default function AdminLogin() {
@@ -62,7 +67,7 @@ export default function AdminLogin() {
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: normalizeLoginIdentifier(email),
+        email: email.trim(),
         password,
       });
 
@@ -75,14 +80,31 @@ export default function AdminLogin() {
         return;
       }
 
-      const { data: role, error: roleError } = await supabase
+      const user = data.user;
+
+      if (!user?.id) {
+        throw new Error("Supabase Auth did not return a signed-in user.");
+      }
+
+      const roleQuery = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", data.user.id)
+        .eq("user_id", user.id)
         .eq("role", "admin")
         .maybeSingle();
 
+      const { data: role, error: roleError } = roleQuery;
+
+      if (import.meta.env.DEV) {
+        console.debug("[admin-login] signed in user", {
+          userId: user.id,
+          email: user.email,
+        });
+        console.debug("[admin-login] admin role query result", roleQuery);
+      }
+
       if (roleError || !role) {
+        await logMissingAdminRoleDebug(user);
         await supabase.auth.signOut();
         toast({
           title: "Yetki gerekli",
@@ -92,6 +114,7 @@ export default function AdminLogin() {
         return;
       }
 
+      // TODO: Replace temporary admin credentials before production.
       toast({ title: "Giriş yapıldı", description: "Yönetim paneline yönlendiriliyorsunuz." });
       navigate("/admin", { replace: true });
     } catch (error) {
