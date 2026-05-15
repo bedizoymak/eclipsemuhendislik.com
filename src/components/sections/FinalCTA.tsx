@@ -1,41 +1,37 @@
 import { ArrowRight, Phone, Mail, MapPin, MessageCircle, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLang } from "@/i18n/LanguageContext";
-import { usePublicSettings } from "@/hooks/useEclipseData";
-import { getWhatsappUrl } from "@/lib/eclipseContent";
+import { CONTACT } from "@/i18n/translations";
 
 export const FinalCTA = () => {
   const { t } = useLang();
-  const { settings } = usePublicSettings();
-  const whatsappUrl = getWhatsappUrl(settings.whatsapp);
-  const phoneTel = `tel:${settings.phone.replace(/\s/g, "")}`;
 
   const cards = [
     {
       icon: MapPin,
       label: t.cta.addressLabel,
-      value: settings.address,
-      href: settings.map_url || "#",
+      value: CONTACT.address,
+      href: CONTACT.mapsUrl,
       external: true,
     },
     {
       icon: Phone,
       label: t.cta.phoneLabel,
-      value: settings.phone,
-      href: phoneTel,
+      value: CONTACT.phone,
+      href: `tel:${CONTACT.phoneTel}`,
     },
     {
       icon: MessageCircle,
       label: t.cta.whatsappLabel,
-      value: settings.phone,
-      href: whatsappUrl,
+      value: CONTACT.phone,
+      href: CONTACT.whatsappUrl,
       external: true,
     },
     {
       icon: Mail,
       label: t.cta.emailLabel,
-      value: settings.email,
-      href: `mailto:${settings.email}`,
+      value: CONTACT.email,
+      href: `mailto:${CONTACT.email}`,
     },
   ];
 
@@ -58,12 +54,12 @@ export const FinalCTA = () => {
 
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Button size="xl" variant="hero" asChild>
-              <a href={`mailto:${settings.email}`}>
+              <a href={`mailto:${CONTACT.email}`}>
                 {t.cta.contact} <ArrowRight className="ml-1 h-4 w-4" />
               </a>
             </Button>
             <Button size="xl" variant="outline-light" asChild>
-              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+              <a href={CONTACT.whatsappUrl} target="_blank" rel="noopener noreferrer">
                 <MessageCircle className="mr-1.5 h-4 w-4" />
                 {t.cta.whatsapp}
               </a>
@@ -96,10 +92,10 @@ export const FinalCTA = () => {
 
         {/* Map */}
         <div className="mx-auto mt-10 max-w-6xl overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-elevated">
-          <div className="relative aspect-[16/7] w-full">
+          <div className="relative aspect-[4/3] w-full sm:aspect-[16/7]">
             <iframe
-              title="Eclipse Mühendislik — Location"
-              src={settings.map_embed_url || ""}
+              title="Eclipse Mühendislik konumu"
+              src={CONTACT.mapsEmbed}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               className="absolute inset-0 h-full w-full grayscale-[40%] contrast-[1.05]"
@@ -110,10 +106,10 @@ export const FinalCTA = () => {
           <div className="flex flex-col items-start justify-between gap-3 border-t border-white/10 bg-navy-deep/60 px-5 py-4 sm:flex-row sm:items-center">
             <div className="flex items-start gap-2.5 text-sm text-white/75">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-electric-bright" />
-              <span>{settings.address}</span>
+              <span>{CONTACT.address}</span>
             </div>
             <a
-              href={settings.map_url || "#"}
+              href={CONTACT.mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-lg bg-electric px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-electric-bright"
@@ -127,8 +123,8 @@ export const FinalCTA = () => {
         <div className="mt-10 inline-flex w-full items-center justify-center gap-2 text-sm text-white/60">
           <Phone className="h-4 w-4" />
           {t.cta.prefer}{" "}
-          <a href={phoneTel} className="font-semibold text-white hover:text-electric-bright">
-            {settings.phone}
+          <a href={`tel:${CONTACT.phoneTel}`} className="font-semibold text-white hover:text-electric-bright">
+            {CONTACT.phone}
           </a>
         </div>
       </div>
