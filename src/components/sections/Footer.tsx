@@ -5,9 +5,17 @@ import { CONTACT } from "@/i18n/translations";
 
 export const Footer = () => {
   const { t } = useLang();
+  const serviceLinks = t.footer.servicesList.map((label) => ({ label, href: "#services" }));
+  const companyLinks = [
+    { label: t.footer.companyList[0], href: "#why" },
+    { label: t.footer.companyList[1], href: "#cases" },
+    { label: t.footer.companyList[2], href: "#why" },
+    { label: t.footer.companyList[3], href: "#faq" },
+    { label: t.footer.companyList[4], href: "#contact" },
+  ].filter((link) => Boolean(link.label));
   const cols = [
-    { title: t.footer.services, links: t.footer.servicesList },
-    { title: t.footer.company, links: t.footer.companyList },
+    { title: t.footer.services, links: serviceLinks },
+    { title: t.footer.company, links: companyLinks },
   ];
 
   return (
@@ -18,13 +26,15 @@ export const Footer = () => {
             <Logo light size="footer" className="inline-flex" />
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/55">{t.footer.desc}</p>
             <div className="mt-6 flex items-center gap-3">
-              <a
-                href="#"
+              {/* TODO: Add the real Eclipse Mühendislik LinkedIn URL when available. */}
+              <span
+                role="img"
                 aria-label="LinkedIn"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] transition-colors hover:bg-white/10 hover:text-white"
+                title="LinkedIn bağlantısı yakında eklenecek"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-white/35"
               >
                 <Linkedin className="h-4 w-4" />
-              </a>
+              </span>
               <a
                 href={CONTACT.whatsappUrl}
                 target="_blank"
@@ -42,9 +52,9 @@ export const Footer = () => {
               <h4 className="font-display text-sm font-semibold uppercase tracking-[0.16em] text-white">{c.title}</h4>
               <ul className="mt-5 space-y-3 text-sm">
                 {c.links.map((l) => (
-                  <li key={l}>
-                    <a href="#" className="transition-colors hover:text-white">
-                      {l}
+                  <li key={l.label}>
+                    <a href={l.href} className="transition-colors hover:text-white">
+                      {l.label}
                     </a>
                   </li>
                 ))}
@@ -92,11 +102,7 @@ export const Footer = () => {
 
         <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-white/5 pt-8 text-xs text-white/45 sm:flex-row sm:items-center">
           <p>© {new Date().getFullYear()} {CONTACT.company}. {t.footer.rights}</p>
-          <div className="flex items-center gap-6">
-            <a href="#" className="hover:text-white">{t.footer.privacy}</a>
-            <a href="#" className="hover:text-white">{t.footer.terms}</a>
-            <a href="#" className="hover:text-white">{t.footer.cookies}</a>
-          </div>
+          {/* TODO: Restore privacy, terms and cookie links after dedicated legal pages are added. */}
         </div>
       </div>
     </footer>
