@@ -9,6 +9,30 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 
+const TEMP_ADMIN_EMAIL = "admin@eclipsemuhendislik.com";
+
+function normalizeLoginIdentifier(identifier: string) {
+  const trimmed = identifier.trim();
+  // TODO: Replace temporary admin credentials before production.
+  return trimmed.toLowerCase() === "admin" ? TEMP_ADMIN_EMAIL : trimmed;
+}
+
+function getAuthErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    const message = error.message.toLowerCase();
+
+    if (message.includes("invalid login credentials") || message.includes("invalid credentials")) {
+      return "E-posta veya şifre hatalı. Lütfen bilgilerinizi kontrol edin.";
+    }
+
+    if (message.includes("failed to fetch") || message.includes("network") || message.includes("fetch")) {
+      return "Supabase auth servisine ulaşılamadı. Ağ bağlantısını ve Supabase ayarlarını kontrol edin.";
+    }
+  }
+
+  return "Giriş sırasında bir auth hatası oluştu. Lütfen tekrar deneyin.";
+}
+
 export default function AdminLogin() {
   const { session, isAdmin, loading } = useAuth();
   const [email, setEmail] = useState("");
@@ -24,22 +48,61 @@ export default function AdminLogin() {
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!supabase) return;
-    setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setBusy(false);
 
-    if (error) {
+    if (!isSupabaseConfigured || !supabase) {
       toast({
-        title: "Giriş başarısız",
-        description: "E-posta veya şifre hatalı. Lütfen bilgilerinizi kontrol edin.",
+        title: "Supabase bağlantısı eksik",
+        description: "VITE_SUPABASE_URL ve VITE_SUPABASE_PUBLISHABLE_KEY ortam değişkenlerini tanımlayın.",
         variant: "destructive",
       });
       return;
     }
 
-    toast({ title: "Giriş yapıldı", description: "Yönetim paneline yönlendiriliyorsunuz." });
-    navigate("/admin", { replace: true });
+    setBusy(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: normalizeLoginIdentifier(email),
+        password,
+      });
+
+      if (error) {
+        toast({
+          title: "Giriş başarısız",
+          description: getAuthErrorMessage(error),
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data: role, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", data.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (roleError || !role) {
+        await supabase.auth.signOut();
+        toast({
+          title: "Yetki gerekli",
+          description: "Bu hesabın yönetim paneli için admin rolü yok.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({ title: "Giriş yapıldı", description: "Yönetim paneline yönlendiriliyorsunuz." });
+      navigate("/admin", { replace: true });
+    } catch (error) {
+      toast({
+        title: "Giriş başarısız",
+        description: getAuthErrorMessage(error),
+        variant: "destructive",
+      });
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -66,8 +129,8 @@ export default function AdminLogin() {
         ) : (
           <form onSubmit={submit} className="space-y-4 rounded-lg border border-border bg-card p-6 shadow-elevated">
             <div>
-              <Label htmlFor="email">E-posta</Label>
-              <Input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" />
+              <Label htmlFor="email">E-posta veya kullanıcı adı</Label>
+              <Input id="email" type="text" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="username" />
             </div>
             <div>
               <Label htmlFor="password">Şifre</Label>
@@ -83,7 +146,6 @@ export default function AdminLogin() {
             <Button type="submit" disabled={busy} className="w-full bg-gradient-electric text-white shadow-glow hover:shadow-elevated">
               {busy ? "Giriş yapılıyor..." : "Panele giriş yap"}
             </Button>
-            <div className="text-center text-sm font-semibold text-foreground">Giriş Yap</div>
           </form>
         )}
       </div>
