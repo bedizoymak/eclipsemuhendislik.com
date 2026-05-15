@@ -6,10 +6,14 @@ const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY a
 
 export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
 
+if (!isSupabaseConfigured && import.meta.env.DEV) {
+  console.warn("Supabase env is missing. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to enable Supabase features.");
+}
+
 export const supabase = isSupabaseConfigured
   ? createClient<Database>(SUPABASE_URL!, SUPABASE_PUBLISHABLE_KEY!, {
       auth: {
-        storage: localStorage,
+        storage: typeof window !== "undefined" ? window.localStorage : undefined,
         persistSession: true,
         autoRefreshToken: true,
       },
