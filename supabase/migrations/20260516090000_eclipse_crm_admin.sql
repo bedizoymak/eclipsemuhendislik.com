@@ -1,6 +1,9 @@
 -- Eclipse Muhendislik CRM/admin schema.
--- This migration is written to be safe after the original CMS migration and
--- also safe on a fresh Supabase project.
+-- Safe to run after the original CMS migration and on a fresh Supabase project.
+
+-- ============================================================================
+-- Extensions and enum compatibility
+-- ============================================================================
 
 create extension if not exists pgcrypto;
 
@@ -19,6 +22,10 @@ begin
   end if;
 end $$;
 
+-- ============================================================================
+-- Shared helper functions
+-- ============================================================================
+
 create or replace function public.update_updated_at_column()
 returns trigger
 language plpgsql
@@ -30,6 +37,10 @@ begin
 end;
 $$;
 
+-- ============================================================================
+-- Auth support tables
+-- ============================================================================
+
 create table if not exists public.user_roles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -38,7 +49,7 @@ create table if not exists public.user_roles (
   unique(user_id, role)
 );
 
-create or replace function public.has_role(user_id uuid, role text)
+create or replace function public.has_role(_user_id uuid, _role text)
 returns boolean
 language sql
 stable
@@ -48,8 +59,8 @@ as $$
   select exists (
     select 1
     from public.user_roles
-    where user_roles.user_id = has_role.user_id
-      and user_roles.role::text = has_role.role
+    where user_roles.user_id = _user_id
+      and user_roles.role::text = _role
   );
 $$;
 
@@ -60,6 +71,10 @@ create table if not exists public.profiles (
   display_name text,
   created_at timestamptz not null default now()
 );
+
+-- ============================================================================
+-- Public website tables, created here only when absent for fresh projects
+-- ============================================================================
 
 create table if not exists public.services (
   id uuid primary key default gen_random_uuid(),
@@ -117,6 +132,10 @@ create table if not exists public.site_settings (
   footer_description text not null default '',
   updated_at timestamptz not null default now()
 );
+
+-- ============================================================================
+-- CRM tables
+-- ============================================================================
 
 alter table public.services
   add column if not exists category text,
@@ -415,6 +434,10 @@ alter table public.site_settings
   add column if not exists service_categories text[] not null default array['Danismanlik', 'Network', 'Sunucu', 'Guvenlik', 'Bulut', 'Yazilim', 'Teknik Destek'],
   add column if not exists expense_categories text[] not null default array['software_subscription', 'hosting_domain', 'hardware_purchase', 'subcontractor', 'transport', 'food', 'office', 'tax', 'salary', 'internet_phone', 'other'];
 
+-- ============================================================================
+-- Updated-at triggers
+-- ============================================================================
+
 drop trigger if exists profiles_updated_at on public.profiles;
 drop trigger if exists services_updated_at on public.services;
 drop trigger if exists projects_updated_at on public.projects;
@@ -443,6 +466,10 @@ create trigger payments_updated_at before update on public.payments for each row
 create trigger account_records_updated_at before update on public.account_records for each row execute function public.update_updated_at_column();
 create trigger expenses_updated_at before update on public.expenses for each row execute function public.update_updated_at_column();
 create trigger support_tickets_updated_at before update on public.support_tickets for each row execute function public.update_updated_at_column();
+
+-- ============================================================================
+-- Indexes
+-- ============================================================================
 
 create index if not exists customers_status_idx on public.customers(status);
 create index if not exists customers_source_idx on public.customers(source);
@@ -478,6 +505,10 @@ create index if not exists support_tickets_opened_date_idx on public.support_tic
 create index if not exists activity_logs_entity_idx on public.activity_logs(related_entity_type, related_entity_id);
 create index if not exists crm_files_entity_idx on public.crm_files(related_entity_type, related_entity_id);
 
+-- ============================================================================
+-- Row level security
+-- ============================================================================
+
 alter table public.profiles enable row level security;
 alter table public.user_roles enable row level security;
 alter table public.customers enable row level security;
@@ -511,6 +542,10 @@ drop policy if exists "Admins manage support tickets" on public.support_tickets;
 drop policy if exists "Admins manage activity logs" on public.activity_logs;
 drop policy if exists "Admins manage crm files" on public.crm_files;
 
+-- ============================================================================
+-- Policies
+-- ============================================================================
+
 create policy "Users view own profile"
   on public.profiles for select
   using (auth.uid() = user_id);
@@ -532,15 +567,62 @@ create policy "Admins manage roles"
   using (public.has_role(auth.uid(), 'admin'))
   with check (public.has_role(auth.uid(), 'admin'));
 
-create policy "Admins manage customers" on public.customers for all using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create policy "Admins manage leads" on public.leads for all using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create policy "Admins manage tasks" on public.tasks for all using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create policy "Admins manage offers" on public.offers for all using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create policy "Admins manage offer items" on public.offer_items for all using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create policy "Admins manage invoices" on public.invoices for all using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create policy "Admins manage payments" on public.payments for all using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create policy "Admins manage account records" on public.account_records for all using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create policy "Admins manage expenses" on public.expenses for all using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create policy "Admins manage support tickets" on public.support_tickets for all using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create policy "Admins manage activity logs" on public.activity_logs for all using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
-create policy "Admins manage crm files" on public.crm_files for all using (public.has_role(auth.uid(), 'admin')) with check (public.has_role(auth.uid(), 'admin'));
+create policy "Admins manage customers"
+  on public.customers for all
+  using (public.has_role(auth.uid(), 'admin'))
+  with check (public.has_role(auth.uid(), 'admin'));
+
+create policy "Admins manage leads"
+  on public.leads for all
+  using (public.has_role(auth.uid(), 'admin'))
+  with check (public.has_role(auth.uid(), 'admin'));
+
+create policy "Admins manage tasks"
+  on public.tasks for all
+  using (public.has_role(auth.uid(), 'admin'))
+  with check (public.has_role(auth.uid(), 'admin'));
+
+create policy "Admins manage offers"
+  on public.offers for all
+  using (public.has_role(auth.uid(), 'admin'))
+  with check (public.has_role(auth.uid(), 'admin'));
+
+create policy "Admins manage offer items"
+  on public.offer_items for all
+  using (public.has_role(auth.uid(), 'admin'))
+  with check (public.has_role(auth.uid(), 'admin'));
+
+create policy "Admins manage invoices"
+  on public.invoices for all
+  using (public.has_role(auth.uid(), 'admin'))
+  with check (public.has_role(auth.uid(), 'admin'));
+
+create policy "Admins manage payments"
+  on public.payments for all
+  using (public.has_role(auth.uid(), 'admin'))
+  with check (public.has_role(auth.uid(), 'admin'));
+
+create policy "Admins manage account records"
+  on public.account_records for all
+  using (public.has_role(auth.uid(), 'admin'))
+  with check (public.has_role(auth.uid(), 'admin'));
+
+create policy "Admins manage expenses"
+  on public.expenses for all
+  using (public.has_role(auth.uid(), 'admin'))
+  with check (public.has_role(auth.uid(), 'admin'));
+
+create policy "Admins manage support tickets"
+  on public.support_tickets for all
+  using (public.has_role(auth.uid(), 'admin'))
+  with check (public.has_role(auth.uid(), 'admin'));
+
+create policy "Admins manage activity logs"
+  on public.activity_logs for all
+  using (public.has_role(auth.uid(), 'admin'))
+  with check (public.has_role(auth.uid(), 'admin'));
+
+create policy "Admins manage crm files"
+  on public.crm_files for all
+  using (public.has_role(auth.uid(), 'admin'))
+  with check (public.has_role(auth.uid(), 'admin'));

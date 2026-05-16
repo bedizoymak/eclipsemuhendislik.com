@@ -16,7 +16,7 @@ import type {
   ServiceRow,
   SupportTicketRow,
   TaskRow,
-} from "@/integrations/supabase/types";
+} from "@/lib/crm";
 
 export type CrmData = {
   customers: CustomerRow[];
@@ -38,6 +38,17 @@ export type CrmData = {
 
 export type CrmDataKey = keyof CrmData;
 export type CrmErrors = Partial<Record<CrmDataKey, string>>;
+
+type QueryResponse<K extends CrmDataKey> = {
+  data: CrmData[K] | null;
+  error: { message: string } | null;
+};
+
+type ModuleResult<K extends CrmDataKey = CrmDataKey> = {
+  key: K;
+  data: CrmData[K];
+  error?: string;
+};
 
 const emptyData: CrmData = {
   customers: [],
@@ -62,6 +73,51 @@ function firstError(errors: CrmErrors) {
   return key && message ? `${key}: ${message}` : null;
 }
 
+async function loadModule<K extends CrmDataKey>(
+  key: K,
+  query: PromiseLike<QueryResponse<K>>,
+): Promise<ModuleResult<K>> {
+  try {
+    const result = await query;
+
+    if (result.error) {
+      return {
+        key,
+        data: [] as unknown as CrmData[K],
+        error: result.error.message,
+      };
+    }
+
+    return {
+      key,
+      data: result.data ?? ([] as unknown as CrmData[K]),
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bilinmeyen veri yukleme hatasi.";
+
+    return {
+      key,
+      data: [] as unknown as CrmData[K],
+      error: message,
+    };
+  }
+}
+
+function mergeResults(results: ModuleResult[]) {
+  const nextData: CrmData = { ...emptyData };
+  const nextErrors: CrmErrors = {};
+
+  for (const result of results) {
+    nextData[result.key] = result.data as never;
+
+    if (result.error) {
+      nextErrors[result.key] = result.error;
+    }
+  }
+
+  return { nextData, nextErrors };
+}
+
 export function useCrmData() {
   const [data, setData] = useState<CrmData>(emptyData);
   const [loading, setLoading] = useState(true);
@@ -71,82 +127,112 @@ export function useCrmData() {
   const load = useCallback(async () => {
     if (!supabase) {
       setLoading(false);
-      setErrors({ customers: "Supabase bağlantısı yok." });
+      setData(emptyData);
+      setErrors({ customers: "Supabase baglantisi yok." });
       return;
     }
 
     setLoading(true);
     setErrors({});
 
-    const [
-      customers,
-      services,
-      leads,
-      projects,
-      tasks,
-      offers,
-      offerItems,
-      invoices,
-      payments,
-      accountRecords,
-      expenses,
-      tickets,
-      activities,
-      files,
-      users,
-    ] = await Promise.all([
-      supabase.from("customers").select("*").order("created_at", { ascending: false }),
-      supabase.from("services").select("*").order("sort_order").order("created_at", { ascending: false }),
-      supabase.from("leads").select("*").order("created_at", { ascending: false }),
-      supabase.from("projects").select("*").order("created_at", { ascending: false }),
-      supabase.from("tasks").select("*").order("due_date", { ascending: true }),
-      supabase.from("offers").select("*").order("offer_date", { ascending: false }),
-      supabase.from("offer_items").select("*").order("sort_order"),
-      supabase.from("invoices").select("*").order("issue_date", { ascending: false }),
-      supabase.from("payments").select("*").order("payment_date", { ascending: false }),
-      supabase.from("account_records").select("*").order("record_date", { ascending: false }),
-      supabase.from("expenses").select("*").order("expense_date", { ascending: false }),
-      supabase.from("support_tickets").select("*").order("opened_date", { ascending: false }),
-      supabase.from("activity_logs").select("*").order("created_at", { ascending: false }),
-      supabase.from("crm_files").select("*").order("created_at", { ascending: false }),
-      supabase.from("profiles").select("id,user_id,email,display_name,created_at").order("created_at", { ascending: false }),
+    const results = await Promise.all([
+      loadModule(
+        "customers",
+        supabase.from("customers").select("*").order("created_at", {
+          ascending: false,
+        }),
+      ),
+      loadModule(
+        "services",
+        supabase
+          .from("services")
+          .select("*")
+          .order("sort_order")
+          .order("created_at", { ascending: false }),
+      ),
+      loadModule(
+        "leads",
+        supabase.from("leads").select("*").order("created_at", {
+          ascending: false,
+        }),
+      ),
+      loadModule(
+        "projects",
+        supabase.from("projects").select("*").order("created_at", {
+          ascending: false,
+        }),
+      ),
+      loadModule(
+        "tasks",
+        supabase.from("tasks").select("*").order("due_date", {
+          ascending: true,
+        }),
+      ),
+      loadModule(
+        "offers",
+        supabase.from("offers").select("*").order("offer_date", {
+          ascending: false,
+        }),
+      ),
+      loadModule(
+        "offerItems",
+        supabase.from("offer_items").select("*").order("sort_order"),
+      ),
+      loadModule(
+        "invoices",
+        supabase.from("invoices").select("*").order("issue_date", {
+          ascending: false,
+        }),
+      ),
+      loadModule(
+        "payments",
+        supabase.from("payments").select("*").order("payment_date", {
+          ascending: false,
+        }),
+      ),
+      loadModule(
+        "accountRecords",
+        supabase.from("account_records").select("*").order("record_date", {
+          ascending: false,
+        }),
+      ),
+      loadModule(
+        "expenses",
+        supabase.from("expenses").select("*").order("expense_date", {
+          ascending: false,
+        }),
+      ),
+      loadModule(
+        "tickets",
+        supabase.from("support_tickets").select("*").order("opened_date", {
+          ascending: false,
+        }),
+      ),
+      loadModule(
+        "activities",
+        supabase.from("activity_logs").select("*").order("created_at", {
+          ascending: false,
+        }),
+      ),
+      loadModule(
+        "files",
+        supabase.from("crm_files").select("*").order("created_at", {
+          ascending: false,
+        }),
+      ),
+      loadModule(
+        "users",
+        supabase
+          .from("profiles")
+          .select("id,user_id,email,display_name,created_at")
+          .order("created_at", { ascending: false }),
+      ),
     ]);
 
-    const nextErrors: CrmErrors = {};
-    if (customers.error) nextErrors.customers = customers.error.message;
-    if (services.error) nextErrors.services = services.error.message;
-    if (leads.error) nextErrors.leads = leads.error.message;
-    if (projects.error) nextErrors.projects = projects.error.message;
-    if (tasks.error) nextErrors.tasks = tasks.error.message;
-    if (offers.error) nextErrors.offers = offers.error.message;
-    if (offerItems.error) nextErrors.offerItems = offerItems.error.message;
-    if (invoices.error) nextErrors.invoices = invoices.error.message;
-    if (payments.error) nextErrors.payments = payments.error.message;
-    if (accountRecords.error) nextErrors.accountRecords = accountRecords.error.message;
-    if (expenses.error) nextErrors.expenses = expenses.error.message;
-    if (tickets.error) nextErrors.tickets = tickets.error.message;
-    if (activities.error) nextErrors.activities = activities.error.message;
-    if (files.error) nextErrors.files = files.error.message;
-    if (users.error) nextErrors.users = users.error.message;
+    const { nextData, nextErrors } = mergeResults(results);
 
+    setData(nextData);
     setErrors(nextErrors);
-    setData({
-      customers: customers.data ?? [],
-      services: services.data ?? [],
-      leads: leads.data ?? [],
-      projects: projects.data ?? [],
-      tasks: tasks.data ?? [],
-      offers: offers.data ?? [],
-      offerItems: offerItems.data ?? [],
-      invoices: invoices.data ?? [],
-      payments: payments.data ?? [],
-      accountRecords: accountRecords.data ?? [],
-      expenses: expenses.data ?? [],
-      tickets: tickets.data ?? [],
-      activities: activities.data ?? [],
-      files: files.data ?? [],
-      users: users.data ?? [],
-    });
     setLoading(false);
   }, []);
 

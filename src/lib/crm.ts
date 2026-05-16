@@ -1,6 +1,63 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+export type {
+  AccountRecordRow,
+  ActivityLogRow,
+  CrmFileRow,
+  CustomerRow,
+  ExpenseRow,
+  InvoiceRow,
+  LeadRow,
+  OfferItemRow,
+  OfferRow,
+  PaymentRow,
+  ProfileRow,
+  ProjectRow,
+  ServiceRow,
+  SupportTicketRow,
+  TaskRow,
+  UserRoleRow,
+} from "@/integrations/supabase/types";
 
-export type DbRow = Record<string, any>;
+export type CrmCell =
+  | string
+  | number
+  | boolean
+  | string[]
+  | null
+  | undefined;
+
+export type DbRow = {
+  id?: string;
+  title?: string;
+  customer_name?: string;
+  contact_person?: string | null;
+  customer_id?: string | null;
+  project_id?: string | null;
+  lead_id?: string | null;
+  offer_id?: string | null;
+  invoice_id?: string | null;
+  account_record_id?: string | null;
+  ticket_id?: string | null;
+  customer_type?: string;
+  category?: string | null;
+  sector?: string | null;
+  tax_office?: string | null;
+  tax_number?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  website?: string | null;
+  address?: string | null;
+  notes?: string | null;
+  status?: string;
+  source?: string;
+  tags?: string[] | null;
+  last_contact_date?: string | null;
+  amount?: number | string | null;
+  vat?: number | string | null;
+  total?: number | string | null;
+  has_receipt?: boolean;
+  is_official?: boolean;
+  [key: string]: CrmCell;
+};
 
 export const CUSTOMER_TYPES = [
   { value: "company", label: "Firma" },
@@ -148,7 +205,11 @@ export function labelOf(options: { value: string; label: string }[], value?: str
 }
 
 export function formatTRY(value: number | string | null | undefined) {
-  return new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 2 }).format(Number(value ?? 0));
+  return new Intl.NumberFormat("tr-TR", {
+    style: "currency",
+    currency: "TRY",
+    maximumFractionDigits: 2,
+  }).format(Number(value ?? 0));
 }
 
 export function formatNumber(value: number | string | null | undefined) {
@@ -182,7 +243,9 @@ export function sumBy<T extends DbRow>(rows: T[], key: keyof T) {
   return rows.reduce((sum, item) => sum + Number(item[key] ?? 0), 0);
 }
 
-export function customerName(customer?: DbRow | null) {
+export function customerName(
+  customer?: Pick<DbRow, "customer_name" | "contact_person"> | null,
+) {
   return customer?.customer_name || customer?.contact_person || "Müşteri seçilmedi";
 }
 
@@ -229,14 +292,17 @@ export function statusBadgeClass(value?: string | null) {
   }
 }
 
-export function exportCSV(filename: string, rows: Record<string, any>[]) {
+export function exportCSV(filename: string, rows: Record<string, unknown>[]) {
   if (!rows.length) return;
   const headers = Object.keys(rows[0]);
-  const escape = (value: any) => {
+  const escape = (value: unknown) => {
     const text = value == null ? "" : String(value);
     return /[",\n;]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
   };
-  const csv = [headers.join(";"), ...rows.map((row) => headers.map((header) => escape(row[header])).join(";"))].join("\n");
+  const csv = [
+    headers.join(";"),
+    ...rows.map((row) => headers.map((header) => escape(row[header])).join(";")),
+  ].join("\n");
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -246,7 +312,12 @@ export function exportCSV(filename: string, rows: Record<string, any>[]) {
   URL.revokeObjectURL(url);
 }
 
-export function offerItemTotal(item: { quantity: number | string; unit_price: number | string; vat_rate: number | string; discount: number | string }) {
+export function offerItemTotal(item: {
+  quantity: number | string;
+  unit_price: number | string;
+  vat_rate: number | string;
+  discount: number | string;
+}) {
   const quantity = Number(item.quantity || 0);
   const unit = Number(item.unit_price || 0);
   const discount = Number(item.discount || 0);
