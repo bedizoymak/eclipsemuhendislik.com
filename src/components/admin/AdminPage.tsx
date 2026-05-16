@@ -27,9 +27,18 @@ type AdminMetricCardProps = {
   value: ReactNode;
   description?: ReactNode;
   icon?: LucideIcon;
+  tone?: "default" | "success" | "warning" | "danger" | "accent";
 };
 
-export function AdminMetricCard({ label, value, description, icon: Icon }: AdminMetricCardProps) {
+const metricToneClass = {
+  default: "bg-secondary text-foreground",
+  success: "bg-emerald-50 text-emerald-700",
+  warning: "bg-amber-50 text-amber-700",
+  danger: "bg-red-50 text-red-700",
+  accent: "bg-electric-soft text-accent",
+};
+
+export function AdminMetricCard({ label, value, description, icon: Icon, tone = "accent" }: AdminMetricCardProps) {
   return (
     <div className="rounded-lg border border-border bg-card p-4 shadow-soft transition-all hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-elevated">
       <div className="flex items-start justify-between gap-3">
@@ -38,7 +47,7 @@ export function AdminMetricCard({ label, value, description, icon: Icon }: Admin
           <div className="mt-2 text-2xl font-semibold text-foreground">{value}</div>
         </div>
         {Icon && (
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-electric-soft text-accent">
+          <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", metricToneClass[tone])}>
             <Icon className="h-5 w-5" />
           </div>
         )}

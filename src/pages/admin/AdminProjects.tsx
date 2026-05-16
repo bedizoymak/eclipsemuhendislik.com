@@ -1,274 +1,254 @@
-import { useEffect, useMemo, useState } from "react";
-import { Edit, Eye, EyeOff, FolderKanban, Plus, Save, Search, Trash2, X } from "lucide-react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { Edit, Eye, FolderKanban, Plus, Search, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import type { ProjectRow, ProjectStatus } from "@/integrations/supabase/types";
-import { defaultProjects } from "@/lib/eclipseContent";
-import { AdminEmptyState, AdminPageHeader } from "@/components/admin/AdminPage";
+import { AdminEmptyState, AdminMetricCard, AdminPageHeader } from "@/components/admin/AdminPage";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useCrmData } from "@/hooks/useCrmData";
+import { customerName, DbRow, formatDate, formatTRY, labelOf, PRIORITIES, PROJECT_STATUSES, statusBadgeClass } from "@/lib/crm";
 import { cn } from "@/lib/utils";
 
 type ProjectForm = {
   id?: string;
   title: string;
-  category: string;
-  location: string;
-  project_year: string;
-  short_description: string;
-  detail_description: string;
-  cover_image_url: string;
-  gallery_images: string;
-  sort_order: number;
-  status: ProjectStatus;
+  customer_id: string;
+  related_lead_id: string;
+  related_offer_id: string;
+  service_category: string;
+  project_status: string;
+  start_date: string;
+  deadline: string;
+  completion_date: string;
+  budget: string;
+  actual_cost: string;
+  profit_estimate: string;
+  priority: string;
+  progress_percentage: string;
+  crm_description: string;
+  internal_notes: string;
 };
 
 const emptyForm: ProjectForm = {
   title: "",
-  category: "",
-  location: "",
-  project_year: "",
-  short_description: "",
-  detail_description: "",
-  cover_image_url: "",
-  gallery_images: "",
-  sort_order: 0,
-  status: "published",
+  customer_id: "",
+  related_lead_id: "",
+  related_offer_id: "",
+  service_category: "",
+  project_status: "planning",
+  start_date: "",
+  deadline: "",
+  completion_date: "",
+  budget: "",
+  actual_cost: "",
+  profit_estimate: "",
+  priority: "medium",
+  progress_percentage: "0",
+  crm_description: "",
+  internal_notes: "",
 };
 
-function toForm(row: ProjectRow): ProjectForm {
+function toForm(row: DbRow): ProjectForm {
   return {
     id: row.id,
-    title: row.title,
-    category: row.category ?? "",
-    location: row.location ?? "",
-    project_year: row.project_year ?? "",
-    short_description: row.short_description,
-    detail_description: row.detail_description ?? "",
-    cover_image_url: row.cover_image_url ?? "",
-    gallery_images: (row.gallery_images ?? []).join("\n"),
-    sort_order: row.sort_order,
-    status: row.status,
+    title: row.title ?? "",
+    customer_id: row.customer_id ?? "",
+    related_lead_id: row.related_lead_id ?? "",
+    related_offer_id: row.related_offer_id ?? "",
+    service_category: row.service_category ?? "",
+    project_status: row.project_status ?? "planning",
+    start_date: row.start_date ?? "",
+    deadline: row.deadline ?? "",
+    completion_date: row.completion_date ?? "",
+    budget: String(row.budget ?? ""),
+    actual_cost: String(row.actual_cost ?? ""),
+    profit_estimate: String(row.profit_estimate ?? ""),
+    priority: row.priority ?? "medium",
+    progress_percentage: String(row.progress_percentage ?? 0),
+    crm_description: row.crm_description ?? row.detail_description ?? "",
+    internal_notes: row.internal_notes ?? "",
   };
 }
 
 export default function AdminProjects() {
-  const [items, setItems] = useState<ProjectRow[]>(defaultProjects);
-  const [form, setForm] = useState<ProjectForm>(emptyForm);
+  const { data, loading, reload } = useCrmData();
   const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("all");
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState<ProjectForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
-  async function load() {
-    if (!supabase) return;
-    const { data } = await supabase.from("projects").select("*").order("sort_order").order("created_at", { ascending: false });
-    setItems(data?.length ? data : []);
-  }
-
-  useEffect(() => {
-    load();
-  }, []);
-
   const filtered = useMemo(() => {
     const q = query.toLocaleLowerCase("tr-TR");
-    return items.filter((item) => `${item.title} ${item.category ?? ""} ${item.location ?? ""}`.toLocaleLowerCase("tr-TR").includes(q));
-  }, [items, query]);
+    return data.projects.filter((project) => {
+      const customer = data.customers.find((item) => item.id === project.customer_id);
+      const haystack = `${project.title} ${project.service_category ?? ""} ${customerName(customer)}`.toLocaleLowerCase("tr-TR");
+      if (query && !haystack.includes(q)) return false;
+      if (status !== "all" && project.project_status !== status) return false;
+      return true;
+    });
+  }, [data.customers, data.projects, query, status]);
+
+  const summary = {
+    open: data.projects.filter((item) => !["completed", "cancelled"].includes(item.project_status)).length,
+    completed: data.projects.filter((item) => item.project_status === "completed").length,
+    budget: data.projects.reduce((sum, item) => sum + Number(item.budget || 0), 0),
+    profit: data.projects.reduce((sum, item) => sum + Number(item.profit_estimate || 0), 0),
+  };
 
   function update<K extends keyof ProjectForm>(key: K, value: ProjectForm[K]) {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
-  async function save(event: React.FormEvent) {
-    event.preventDefault();
-    if (!supabase) {
-      toast({ title: "Supabase bağlantısı yok", description: "Kayıt işlemleri için Supabase ortam değişkenleri gereklidir.", variant: "destructive" });
-      return;
-    }
-    if (!form.title.trim() || !form.short_description.trim()) {
-      toast({ title: "Eksik bilgi", description: "Proje adı ve kısa açıklama zorunludur.", variant: "destructive" });
-      return;
-    }
+  function openNew() {
+    setForm(emptyForm);
+    setOpen(true);
+  }
 
+  function openEdit(row: DbRow) {
+    setForm(toForm(row));
+    setOpen(true);
+  }
+
+  async function save() {
+    if (!supabase) return;
+    if (!form.title.trim()) {
+      toast({ title: "Proje adı zorunludur", variant: "destructive" });
+      return;
+    }
     setSaving(true);
+    const description = form.crm_description.trim() || "CRM projesi.";
     const payload = {
       title: form.title.trim(),
-      category: form.category.trim() || null,
-      location: form.location.trim() || null,
-      project_year: form.project_year.trim() || null,
-      short_description: form.short_description.trim(),
-      detail_description: form.detail_description.trim() || null,
-      cover_image_url: form.cover_image_url.trim() || null,
-      gallery_images: form.gallery_images
-        .split("\n")
-        .map((item) => item.trim())
-        .filter(Boolean),
-      sort_order: Number(form.sort_order) || 0,
-      status: form.status,
+      customer_id: form.customer_id || null,
+      related_lead_id: form.related_lead_id || null,
+      related_offer_id: form.related_offer_id || null,
+      service_category: form.service_category.trim() || null,
+      project_status: form.project_status,
+      start_date: form.start_date || null,
+      deadline: form.deadline || null,
+      completion_date: form.completion_date || null,
+      budget: Number(form.budget || 0),
+      actual_cost: Number(form.actual_cost || 0),
+      profit_estimate: Number(form.profit_estimate || 0),
+      priority: form.priority,
+      progress_percentage: Number(form.progress_percentage || 0),
+      crm_description: description,
+      internal_notes: form.internal_notes.trim() || null,
+      short_description: description.slice(0, 180),
+      detail_description: description,
+      status: "draft",
     };
-    const result = form.id ? await supabase.from("projects").update(payload).eq("id", form.id) : await supabase.from("projects").insert(payload);
+    const result = form.id ? await (supabase.from("projects" as any).update(payload).eq("id", form.id) as any) : await (supabase.from("projects" as any).insert(payload) as any);
     setSaving(false);
-
-    if (result.error) {
-      toast({ title: "Kaydedilemedi", description: result.error.message, variant: "destructive" });
-      return;
+    if (result.error) toast({ title: "Proje kaydedilemedi", description: result.error.message, variant: "destructive" });
+    else {
+      toast({ title: "Proje kaydedildi" });
+      setOpen(false);
+      reload();
     }
-
-    toast({ title: "Proje / referans kaydedildi" });
-    setForm(emptyForm);
-    load();
   }
 
-  async function toggle(row: ProjectRow) {
-    if (!supabase) return;
-    await supabase.from("projects").update({ status: row.status === "published" ? "draft" : "published" }).eq("id", row.id);
-    toast({ title: row.status === "published" ? "Proje yayından kaldırıldı" : "Proje yayınlandı" });
-    load();
-  }
-
-  async function remove(row: ProjectRow) {
-    if (!supabase || !confirm(`"${row.title}" kaydını silmek istediğinize emin misiniz?`)) return;
-    await supabase.from("projects").delete().eq("id", row.id);
-    toast({ title: "Proje / referans silindi" });
-    load();
+  async function remove(row: DbRow) {
+    if (!supabase || !confirm(`"${row.title}" projesini silmek istediğinize emin misiniz?`)) return;
+    await (supabase.from("projects" as any).delete().eq("id", row.id) as any);
+    toast({ title: "Proje silindi" });
+    reload();
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-      <div>
-        <AdminPageHeader
-          eyebrow="Referans Yönetimi"
-          title="Projeler / Referanslar"
-          description="Eclipse Mühendislik referanslarını, kategorilerini ve yayın durumlarını yönetin."
-          actions={
-            <Button onClick={() => setForm(emptyForm)} className="bg-gradient-electric text-white shadow-glow">
-              <Plus className="h-4 w-4" />
-              Yeni Proje Ekle
-            </Button>
-          }
-        />
+    <div className="space-y-6">
+      <AdminPageHeader
+        eyebrow="Proje Yönetimi"
+        title="Projeler"
+        description="BT projeleri, servis işleri, bakım kurulumları, bütçe, maliyet, kârlılık ve ilerleme takibini yönetin."
+        actions={<Button onClick={openNew} className="bg-gradient-electric text-white shadow-glow"><Plus className="h-4 w-4" /> Proje Ekle</Button>}
+      />
 
-        <div className="mb-4 rounded-lg border border-border bg-card p-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Proje veya referans ara..." className="pl-9" />
-          </div>
-        </div>
-
-        {filtered.length === 0 ? (
-          <AdminEmptyState title="Proje bulunamadı" description="Henüz proje / referans kaydı yok veya arama sonucunda eşleşme bulunamadı." icon={FolderKanban} />
-        ) : (
-          <div className="space-y-3">
-            {filtered.map((item) => (
-              <div key={item.id} className="rounded-lg border border-border bg-card p-4 shadow-soft">
-                <div className="flex flex-col gap-4 md:flex-row md:items-center">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-display text-lg font-semibold">{item.title}</h2>
-                      <span className={cn("rounded-md px-2 py-1 text-xs font-semibold", item.status === "published" ? "bg-electric-soft text-accent" : "bg-muted text-muted-foreground")}>
-                        {item.status === "published" ? "Yayında" : "Taslak"}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-sm text-muted-foreground">{item.short_description}</p>
-                    <div className="mt-2 text-xs text-muted-foreground">
-                      {[item.category, item.location, item.project_year].filter(Boolean).join(" · ") || "Ek bilgi girilmemiş"}
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setForm(toForm(item))}>
-                      <Edit className="h-4 w-4" />
-                      Düzenle
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => toggle(item)}>
-                      {item.status === "published" ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      {item.status === "published" ? "Yayından Kaldır" : "Yayınla"}
-                    </Button>
-                    <Button variant="destructive" size="sm" onClick={() => remove(item)}>
-                      <Trash2 className="h-4 w-4" />
-                      Sil
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <AdminMetricCard label="Açık Proje" value={summary.open} icon={FolderKanban} tone="accent" />
+        <AdminMetricCard label="Tamamlanan" value={summary.completed} icon={FolderKanban} tone="success" />
+        <AdminMetricCard label="Toplam Bütçe" value={formatTRY(summary.budget)} icon={FolderKanban} tone="warning" />
+        <AdminMetricCard label="Kâr Tahmini" value={formatTRY(summary.profit)} icon={FolderKanban} tone={summary.profit >= 0 ? "success" : "danger"} />
       </div>
 
-      <form onSubmit={save} className="h-fit rounded-lg border border-border bg-card p-5 shadow-soft">
-        <div className="mb-5 flex items-center justify-between gap-3">
-          <div>
-            <h2 className="font-display text-xl font-semibold">{form.id ? "Kaydı Düzenle" : "Yeni Proje / Referans"}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Public sitede kullanılacak referans bilgileri.</p>
-          </div>
-          {form.id && (
-            <Button type="button" variant="ghost" size="icon" onClick={() => setForm(emptyForm)} aria-label="Formu kapat">
-              <X className="h-4 w-4" />
-            </Button>
-          )}
+      <div className="grid gap-3 rounded-lg border border-border bg-card p-4 md:grid-cols-[minmax(0,1fr)_220px]">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Proje, müşteri veya hizmet kategorisi ara..." className="pl-9" />
         </div>
+        <Select value={status} onValueChange={setStatus}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tüm durumlar</SelectItem>
+            {PROJECT_STATUSES.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
 
-        <div className="space-y-4">
-          <div>
-            <Label>Proje Adı</Label>
-            <Input value={form.title} onChange={(event) => update("title", event.target.value)} placeholder="Örn. Kurumsal Ağ Yenileme" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Kategori</Label>
-              <Input value={form.category} onChange={(event) => update("category", event.target.value)} placeholder="Kurumsal Ofis" />
-            </div>
-            <div>
-              <Label>Tarih / Yıl</Label>
-              <Input value={form.project_year} onChange={(event) => update("project_year", event.target.value)} placeholder="2026" />
-            </div>
-          </div>
-          <div>
-            <Label>Konum</Label>
-            <Input value={form.location} onChange={(event) => update("location", event.target.value)} placeholder="İstanbul" />
-          </div>
-          <div>
-            <Label>Kısa Açıklama</Label>
-            <Textarea value={form.short_description} onChange={(event) => update("short_description", event.target.value)} rows={3} />
-          </div>
-          <div>
-            <Label>Detay Açıklama</Label>
-            <Textarea value={form.detail_description} onChange={(event) => update("detail_description", event.target.value)} rows={5} />
-          </div>
-          <div>
-            <Label>Kapak Görseli</Label>
-            <Input value={form.cover_image_url} onChange={(event) => update("cover_image_url", event.target.value)} placeholder="https://..." />
-          </div>
-          <div>
-            <Label>Galeri Görselleri</Label>
-            <Textarea value={form.gallery_images} onChange={(event) => update("gallery_images", event.target.value)} rows={3} placeholder="Her satıra bir görsel bağlantısı" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Sıralama</Label>
-              <Input type="number" value={form.sort_order} onChange={(event) => update("sort_order", Number(event.target.value))} />
-            </div>
-            <div>
-              <Label>Durum</Label>
-              <Select value={form.status} onValueChange={(value: ProjectStatus) => update("status", value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="published">Yayında</SelectItem>
-                  <SelectItem value="draft">Taslak</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <Button type="submit" disabled={saving} className="w-full bg-gradient-electric text-white shadow-glow">
-            <Save className="h-4 w-4" />
-            {saving ? "Kaydediliyor..." : "Kaydet"}
-          </Button>
+      {loading ? (
+        <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">Yükleniyor...</div>
+      ) : filtered.length === 0 ? (
+        <AdminEmptyState title="Proje bulunamadı" description="İlk CRM projesini oluşturun veya filtreleri temizleyin." icon={FolderKanban} action={<Button onClick={openNew}>Proje Ekle</Button>} />
+      ) : (
+        <div className="overflow-x-auto rounded-lg border border-border bg-card">
+          <table className="w-full text-sm">
+            <thead className="bg-secondary/60 text-left text-xs uppercase text-muted-foreground">
+              <tr><th className="p-3">Proje</th><th className="p-3">Müşteri</th><th className="p-3">Durum</th><th className="p-3">Öncelik</th><th className="p-3">Deadline</th><th className="p-3 text-right">Bütçe</th><th className="p-3">İlerleme</th><th className="p-3 text-right">İşlem</th></tr>
+            </thead>
+            <tbody>
+              {filtered.map((project) => {
+                const customer = data.customers.find((item) => item.id === project.customer_id);
+                return (
+                  <tr key={project.id} className="border-t border-border hover:bg-secondary/35">
+                    <td className="p-3"><div className="font-semibold">{project.title}</div><div className="text-xs text-muted-foreground">{project.service_category || "Kategori yok"}</div></td>
+                    <td className="p-3">{customerName(customer)}</td>
+                    <td className="p-3"><span className={cn("rounded-md border px-2 py-1 text-xs", statusBadgeClass(project.project_status))}>{labelOf(PROJECT_STATUSES, project.project_status)}</span></td>
+                    <td className="p-3">{labelOf(PRIORITIES, project.priority)}</td>
+                    <td className="p-3">{formatDate(project.deadline)}</td>
+                    <td className="p-3 text-right font-medium">{formatTRY(project.budget)}</td>
+                    <td className="p-3"><div className="h-2 w-28 rounded-full bg-secondary"><div className="h-2 rounded-full bg-accent" style={{ width: `${project.progress_percentage || 0}%` }} /></div><div className="mt-1 text-xs">{project.progress_percentage || 0}%</div></td>
+                    <td className="p-3"><div className="flex justify-end gap-1"><Button asChild size="sm" variant="ghost"><Link to={`/admin/projects/${project.id}`}><Eye className="h-4 w-4" /></Link></Button><Button size="sm" variant="ghost" onClick={() => openEdit(project)}><Edit className="h-4 w-4" /></Button><Button size="sm" variant="ghost" onClick={() => remove(project)}><Trash2 className="h-4 w-4 text-destructive" /></Button></div></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
-      </form>
+      )}
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
+          <DialogHeader><DialogTitle>{form.id ? "Projeyi Düzenle" : "Yeni Proje"}</DialogTitle></DialogHeader>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div><Label>Proje Adı *</Label><Input value={form.title} onChange={(event) => update("title", event.target.value)} /></div>
+            <div><Label>Müşteri</Label><Select value={form.customer_id || "none"} onValueChange={(value) => update("customer_id", value === "none" ? "" : value)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">Seçilmedi</SelectItem>{data.customers.map((customer) => <SelectItem key={customer.id} value={customer.id}>{customerName(customer)}</SelectItem>)}</SelectContent></Select></div>
+            <div><Label>İlgili Fırsat</Label><Select value={form.related_lead_id || "none"} onValueChange={(value) => update("related_lead_id", value === "none" ? "" : value)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">Seçilmedi</SelectItem>{data.leads.map((lead) => <SelectItem key={lead.id} value={lead.id}>{lead.prospect_name}</SelectItem>)}</SelectContent></Select></div>
+            <div><Label>İlgili Teklif</Label><Select value={form.related_offer_id || "none"} onValueChange={(value) => update("related_offer_id", value === "none" ? "" : value)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">Seçilmedi</SelectItem>{data.offers.map((offer) => <SelectItem key={offer.id} value={offer.id}>{offer.offer_number}</SelectItem>)}</SelectContent></Select></div>
+            <div><Label>Hizmet Kategorisi</Label><Input value={form.service_category} onChange={(event) => update("service_category", event.target.value)} /></div>
+            <div><Label>Durum</Label><Select value={form.project_status} onValueChange={(value) => update("project_status", value)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{PROJECT_STATUSES.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}</SelectContent></Select></div>
+            <div><Label>Başlangıç</Label><Input type="date" value={form.start_date} onChange={(event) => update("start_date", event.target.value)} /></div>
+            <div><Label>Deadline</Label><Input type="date" value={form.deadline} onChange={(event) => update("deadline", event.target.value)} /></div>
+            <div><Label>Tamamlanma</Label><Input type="date" value={form.completion_date} onChange={(event) => update("completion_date", event.target.value)} /></div>
+            <div><Label>Öncelik</Label><Select value={form.priority} onValueChange={(value) => update("priority", value)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{PRIORITIES.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}</SelectContent></Select></div>
+            <div><Label>Bütçe</Label><Input type="number" value={form.budget} onChange={(event) => update("budget", event.target.value)} /></div>
+            <div><Label>Gerçek Maliyet</Label><Input type="number" value={form.actual_cost} onChange={(event) => update("actual_cost", event.target.value)} /></div>
+            <div><Label>Kâr Tahmini</Label><Input type="number" value={form.profit_estimate} onChange={(event) => update("profit_estimate", event.target.value)} /></div>
+            <div><Label>İlerleme (%)</Label><Input type="number" min={0} max={100} value={form.progress_percentage} onChange={(event) => update("progress_percentage", event.target.value)} /></div>
+            <div className="md:col-span-2"><Label>Açıklama</Label><Textarea value={form.crm_description} onChange={(event) => update("crm_description", event.target.value)} rows={3} /></div>
+            <div className="md:col-span-2"><Label>İç Notlar</Label><Textarea value={form.internal_notes} onChange={(event) => update("internal_notes", event.target.value)} rows={3} /></div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>İptal</Button><Button onClick={save} disabled={saving} className="bg-gradient-electric text-white">{saving ? "Kaydediliyor..." : "Kaydet"}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
