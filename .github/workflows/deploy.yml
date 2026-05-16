@@ -1,3 +1,4 @@
+#test
 name: Deploy to FTP
 
 on:
@@ -9,6 +10,7 @@ jobs:
   ftp-deploy:
     name: Upload to FTP
     runs-on: ubuntu-latest
+
     env:
       VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
@@ -22,7 +24,7 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install Node dependencies
+      - name: Install dependencies
         run: npm install
 
       - name: Build project
@@ -35,10 +37,13 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
-          server-dir: ./
+          server-dir: public_html/
           dangerous-clean-slate: true
           exclude: |
             **/*.map
             **/node_modules/**
             **/.git/**
             **/.github/**
+            **/.gitignore
+            
+            
