@@ -44,11 +44,13 @@ type QueryResponse<K extends CrmDataKey> = {
   error: { message: string } | null;
 };
 
-type ModuleResult<K extends CrmDataKey = CrmDataKey> = {
-  key: K;
-  data: CrmData[K];
-  error?: string;
-};
+type ModuleResult<K extends CrmDataKey = CrmDataKey> = K extends CrmDataKey
+  ? {
+      key: K;
+      data: CrmData[K];
+      error?: string;
+    }
+  : never;
 
 const emptyData: CrmData = {
   customers: [],
@@ -97,7 +99,10 @@ async function loadModule<K extends CrmDataKey>(
       data: result.data ?? emptyModuleData(key),
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Bilinmeyen veri yukleme hatasi.";
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Bilinmeyen veri yukleme hatasi.";
 
     return {
       key,
@@ -112,7 +117,53 @@ function mergeResults(results: ModuleResult[]) {
   const nextErrors: CrmErrors = {};
 
   for (const result of results) {
-    nextData[result.key] = result.data as never;
+    switch (result.key) {
+      case "customers":
+        nextData.customers = result.data;
+        break;
+      case "services":
+        nextData.services = result.data;
+        break;
+      case "leads":
+        nextData.leads = result.data;
+        break;
+      case "projects":
+        nextData.projects = result.data;
+        break;
+      case "tasks":
+        nextData.tasks = result.data;
+        break;
+      case "offers":
+        nextData.offers = result.data;
+        break;
+      case "offerItems":
+        nextData.offerItems = result.data;
+        break;
+      case "invoices":
+        nextData.invoices = result.data;
+        break;
+      case "payments":
+        nextData.payments = result.data;
+        break;
+      case "accountRecords":
+        nextData.accountRecords = result.data;
+        break;
+      case "expenses":
+        nextData.expenses = result.data;
+        break;
+      case "tickets":
+        nextData.tickets = result.data;
+        break;
+      case "activities":
+        nextData.activities = result.data;
+        break;
+      case "files":
+        nextData.files = result.data;
+        break;
+      case "users":
+        nextData.users = result.data;
+        break;
+    }
 
     if (result.error) {
       nextErrors[result.key] = result.error;
