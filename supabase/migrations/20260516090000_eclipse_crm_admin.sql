@@ -69,8 +69,12 @@ create table if not exists public.profiles (
   user_id uuid not null unique references auth.users(id) on delete cascade,
   email text,
   display_name text,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
+
+alter table public.profiles
+  add column if not exists updated_at timestamptz not null default now();
 
 -- ============================================================================
 -- Public website tables, created here only when absent for fresh projects
@@ -169,9 +173,12 @@ create table if not exists public.customers (
   created_by uuid references auth.users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint customers_customer_type_check check (customer_type in ('company', 'individual')),
-  constraint customers_status_check check (status in ('active', 'passive', 'prospect', 'blacklisted')),
-  constraint customers_source_check check (source in ('referral', 'website', 'phone', 'social', 'existing_network', 'other'))
+  constraint customers_customer_type_check
+    check (customer_type in ('company', 'individual')),
+  constraint customers_status_check
+    check (status in ('active', 'passive', 'prospect', 'blacklisted')),
+  constraint customers_source_check
+    check (source in ('referral', 'website', 'phone', 'social', 'existing_network', 'other'))
 );
 
 create table if not exists public.leads (
@@ -194,9 +201,12 @@ create table if not exists public.leads (
   created_by uuid references auth.users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint leads_source_check check (source in ('referral', 'website', 'phone', 'social', 'existing_network', 'other')),
-  constraint leads_probability_check check (probability between 0 and 100),
-  constraint leads_stage_check check (stage in ('new', 'contacted', 'meeting_scheduled', 'proposal_sent', 'negotiation', 'won', 'lost'))
+  constraint leads_source_check
+    check (source in ('referral', 'website', 'phone', 'social', 'existing_network', 'other')),
+  constraint leads_probability_check
+    check (probability between 0 and 100),
+  constraint leads_stage_check
+    check (stage in ('new', 'contacted', 'meeting_scheduled', 'proposal_sent', 'negotiation', 'won', 'lost'))
 );
 
 alter table public.projects
@@ -243,8 +253,10 @@ create table if not exists public.tasks (
   created_by uuid references auth.users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint tasks_priority_check check (priority in ('low', 'medium', 'high', 'urgent')),
-  constraint tasks_status_check check (status in ('todo', 'in_progress', 'blocked', 'done', 'cancelled'))
+  constraint tasks_priority_check
+    check (priority in ('low', 'medium', 'high', 'urgent')),
+  constraint tasks_status_check
+    check (status in ('todo', 'in_progress', 'blocked', 'done', 'cancelled'))
 );
 
 create table if not exists public.offers (
@@ -264,7 +276,8 @@ create table if not exists public.offers (
   created_by uuid references auth.users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint offers_status_check check (status in ('draft', 'sent', 'accepted', 'rejected', 'expired'))
+  constraint offers_status_check
+    check (status in ('draft', 'sent', 'accepted', 'rejected', 'expired'))
 );
 
 create table if not exists public.offer_items (
@@ -303,8 +316,13 @@ create table if not exists public.invoices (
   created_by uuid references auth.users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint invoices_status_check check (status in ('draft', 'issued', 'paid', 'overdue', 'cancelled')),
-  constraint invoices_payment_method_check check (payment_method in ('cash', 'bank_transfer', 'credit_card', 'other') or payment_method is null)
+  constraint invoices_status_check
+    check (status in ('draft', 'issued', 'paid', 'overdue', 'cancelled')),
+  constraint invoices_payment_method_check
+    check (
+      payment_method in ('cash', 'bank_transfer', 'credit_card', 'other')
+      or payment_method is null
+    )
 );
 
 create table if not exists public.account_records (
@@ -323,9 +341,12 @@ create table if not exists public.account_records (
   created_by uuid references auth.users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint account_records_record_type_check check (record_type in ('receivable', 'payable', 'advance', 'cash_in', 'cash_out')),
-  constraint account_records_currency_check check (currency in ('TRY', 'USD', 'EUR')),
-  constraint account_records_status_check check (status in ('open', 'partially_paid', 'closed', 'cancelled'))
+  constraint account_records_record_type_check
+    check (record_type in ('receivable', 'payable', 'advance', 'cash_in', 'cash_out')),
+  constraint account_records_currency_check
+    check (currency in ('TRY', 'USD', 'EUR')),
+  constraint account_records_status_check
+    check (status in ('open', 'partially_paid', 'closed', 'cancelled'))
 );
 
 create table if not exists public.payments (
@@ -342,7 +363,8 @@ create table if not exists public.payments (
   created_by uuid references auth.users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint payments_method_check check (method in ('cash', 'bank_transfer', 'credit_card', 'other'))
+  constraint payments_method_check
+    check (method in ('cash', 'bank_transfer', 'credit_card', 'other'))
 );
 
 create table if not exists public.expenses (
@@ -361,8 +383,24 @@ create table if not exists public.expenses (
   created_by uuid references auth.users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint expenses_category_check check (category in ('software_subscription', 'hosting_domain', 'hardware_purchase', 'subcontractor', 'transport', 'food', 'office', 'tax', 'salary', 'internet_phone', 'other')),
-  constraint expenses_payment_method_check check (payment_method in ('cash', 'bank_transfer', 'credit_card', 'other'))
+  constraint expenses_category_check
+    check (
+      category in (
+        'software_subscription',
+        'hosting_domain',
+        'hardware_purchase',
+        'subcontractor',
+        'transport',
+        'food',
+        'office',
+        'tax',
+        'salary',
+        'internet_phone',
+        'other'
+      )
+    ),
+  constraint expenses_payment_method_check
+    check (payment_method in ('cash', 'bank_transfer', 'credit_card', 'other'))
 );
 
 create table if not exists public.support_tickets (
@@ -383,10 +421,14 @@ create table if not exists public.support_tickets (
   created_by uuid references auth.users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint support_tickets_channel_check check (channel in ('phone', 'whatsapp', 'email', 'website', 'onsite')),
-  constraint support_tickets_category_check check (category in ('network', 'server', 'software', 'hardware', 'security', 'backup', 'website', 'other')),
-  constraint support_tickets_priority_check check (priority in ('low', 'medium', 'high', 'urgent')),
-  constraint support_tickets_status_check check (status in ('open', 'in_progress', 'waiting_customer', 'resolved', 'closed'))
+  constraint support_tickets_channel_check
+    check (channel in ('phone', 'whatsapp', 'email', 'website', 'onsite')),
+  constraint support_tickets_category_check
+    check (category in ('network', 'server', 'software', 'hardware', 'security', 'backup', 'website', 'other')),
+  constraint support_tickets_priority_check
+    check (priority in ('low', 'medium', 'high', 'urgent')),
+  constraint support_tickets_status_check
+    check (status in ('open', 'in_progress', 'waiting_customer', 'resolved', 'closed'))
 );
 
 do $$
@@ -409,8 +451,34 @@ create table if not exists public.activity_logs (
   content text,
   created_by uuid references auth.users(id),
   created_at timestamptz not null default now(),
-  constraint activity_logs_related_entity_type_check check (related_entity_type in ('customer', 'lead', 'project', 'offer', 'invoice', 'ticket', 'task', 'payment', 'expense', 'account_record')),
-  constraint activity_logs_activity_type_check check (activity_type in ('note', 'call', 'meeting', 'email', 'whatsapp', 'status_change', 'payment', 'system'))
+  constraint activity_logs_related_entity_type_check
+    check (
+      related_entity_type in (
+        'customer',
+        'lead',
+        'project',
+        'offer',
+        'invoice',
+        'ticket',
+        'task',
+        'payment',
+        'expense',
+        'account_record'
+      )
+    ),
+  constraint activity_logs_activity_type_check
+    check (
+      activity_type in (
+        'note',
+        'call',
+        'meeting',
+        'email',
+        'whatsapp',
+        'status_change',
+        'payment',
+        'system'
+      )
+    )
 );
 
 create table if not exists public.crm_files (
@@ -423,7 +491,8 @@ create table if not exists public.crm_files (
   notes text,
   created_by uuid references auth.users(id),
   created_at timestamptz not null default now(),
-  constraint crm_files_related_entity_type_check check (related_entity_type in ('customer', 'lead', 'project', 'offer', 'invoice', 'ticket'))
+  constraint crm_files_related_entity_type_check
+    check (related_entity_type in ('customer', 'lead', 'project', 'offer', 'invoice', 'ticket'))
 );
 
 alter table public.site_settings
@@ -431,8 +500,28 @@ alter table public.site_settings
   add column if not exists default_currency text not null default 'TRY',
   add column if not exists offer_prefix text not null default 'TEK',
   add column if not exists invoice_prefix text not null default 'FTR',
-  add column if not exists service_categories text[] not null default array['Danismanlik', 'Network', 'Sunucu', 'Guvenlik', 'Bulut', 'Yazilim', 'Teknik Destek'],
-  add column if not exists expense_categories text[] not null default array['software_subscription', 'hosting_domain', 'hardware_purchase', 'subcontractor', 'transport', 'food', 'office', 'tax', 'salary', 'internet_phone', 'other'];
+  add column if not exists service_categories text[] not null default array[
+    'Danismanlik',
+    'Network',
+    'Sunucu',
+    'Guvenlik',
+    'Bulut',
+    'Yazilim',
+    'Teknik Destek'
+  ],
+  add column if not exists expense_categories text[] not null default array[
+    'software_subscription',
+    'hosting_domain',
+    'hardware_purchase',
+    'subcontractor',
+    'transport',
+    'food',
+    'office',
+    'tax',
+    'salary',
+    'internet_phone',
+    'other'
+  ];
 
 -- ============================================================================
 -- Updated-at triggers
@@ -453,19 +542,75 @@ drop trigger if exists account_records_updated_at on public.account_records;
 drop trigger if exists expenses_updated_at on public.expenses;
 drop trigger if exists support_tickets_updated_at on public.support_tickets;
 
-create trigger services_updated_at before update on public.services for each row execute function public.update_updated_at_column();
-create trigger projects_updated_at before update on public.projects for each row execute function public.update_updated_at_column();
-create trigger site_settings_updated_at before update on public.site_settings for each row execute function public.update_updated_at_column();
-create trigger customers_updated_at before update on public.customers for each row execute function public.update_updated_at_column();
-create trigger leads_updated_at before update on public.leads for each row execute function public.update_updated_at_column();
-create trigger tasks_updated_at before update on public.tasks for each row execute function public.update_updated_at_column();
-create trigger offers_updated_at before update on public.offers for each row execute function public.update_updated_at_column();
-create trigger offer_items_updated_at before update on public.offer_items for each row execute function public.update_updated_at_column();
-create trigger invoices_updated_at before update on public.invoices for each row execute function public.update_updated_at_column();
-create trigger payments_updated_at before update on public.payments for each row execute function public.update_updated_at_column();
-create trigger account_records_updated_at before update on public.account_records for each row execute function public.update_updated_at_column();
-create trigger expenses_updated_at before update on public.expenses for each row execute function public.update_updated_at_column();
-create trigger support_tickets_updated_at before update on public.support_tickets for each row execute function public.update_updated_at_column();
+create trigger profiles_updated_at
+  before update on public.profiles
+  for each row
+  execute function public.update_updated_at_column();
+
+create trigger services_updated_at
+  before update on public.services
+  for each row
+  execute function public.update_updated_at_column();
+
+create trigger projects_updated_at
+  before update on public.projects
+  for each row
+  execute function public.update_updated_at_column();
+
+create trigger site_settings_updated_at
+  before update on public.site_settings
+  for each row
+  execute function public.update_updated_at_column();
+
+create trigger customers_updated_at
+  before update on public.customers
+  for each row
+  execute function public.update_updated_at_column();
+
+create trigger leads_updated_at
+  before update on public.leads
+  for each row
+  execute function public.update_updated_at_column();
+
+create trigger tasks_updated_at
+  before update on public.tasks
+  for each row
+  execute function public.update_updated_at_column();
+
+create trigger offers_updated_at
+  before update on public.offers
+  for each row
+  execute function public.update_updated_at_column();
+
+create trigger offer_items_updated_at
+  before update on public.offer_items
+  for each row
+  execute function public.update_updated_at_column();
+
+create trigger invoices_updated_at
+  before update on public.invoices
+  for each row
+  execute function public.update_updated_at_column();
+
+create trigger payments_updated_at
+  before update on public.payments
+  for each row
+  execute function public.update_updated_at_column();
+
+create trigger account_records_updated_at
+  before update on public.account_records
+  for each row
+  execute function public.update_updated_at_column();
+
+create trigger expenses_updated_at
+  before update on public.expenses
+  for each row
+  execute function public.update_updated_at_column();
+
+create trigger support_tickets_updated_at
+  before update on public.support_tickets
+  for each row
+  execute function public.update_updated_at_column();
 
 -- ============================================================================
 -- Indexes

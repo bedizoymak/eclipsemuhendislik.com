@@ -73,6 +73,10 @@ function firstError(errors: CrmErrors) {
   return key && message ? `${key}: ${message}` : null;
 }
 
+function emptyModuleData<K extends CrmDataKey>(key: K): CrmData[K] {
+  return emptyData[key];
+}
+
 async function loadModule<K extends CrmDataKey>(
   key: K,
   query: PromiseLike<QueryResponse<K>>,
@@ -83,21 +87,21 @@ async function loadModule<K extends CrmDataKey>(
     if (result.error) {
       return {
         key,
-        data: [] as unknown as CrmData[K],
+        data: emptyModuleData(key),
         error: result.error.message,
       };
     }
 
     return {
       key,
-      data: result.data ?? ([] as unknown as CrmData[K]),
+      data: result.data ?? emptyModuleData(key),
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Bilinmeyen veri yukleme hatasi.";
 
     return {
       key,
-      data: [] as unknown as CrmData[K],
+      data: emptyModuleData(key),
       error: message,
     };
   }

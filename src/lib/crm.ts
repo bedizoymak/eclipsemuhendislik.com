@@ -59,6 +59,11 @@ export type DbRow = {
   [key: string]: CrmCell;
 };
 
+export type CrmOption = {
+  value: string;
+  label: string;
+};
+
 export const CUSTOMER_TYPES = [
   { value: "company", label: "Firma" },
   { value: "individual", label: "Bireysel" },
@@ -200,7 +205,7 @@ export const PRICING_TYPES = [
   { value: "custom", label: "Özel" },
 ];
 
-export function labelOf(options: { value: string; label: string }[], value?: string | null) {
+export function labelOf(options: CrmOption[], value?: string | null) {
   return options.find((item) => item.value === value)?.label ?? value ?? "-";
 }
 
